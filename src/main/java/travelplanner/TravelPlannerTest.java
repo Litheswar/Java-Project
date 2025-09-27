@@ -41,8 +41,7 @@ public class TravelPlannerTest {
                                        45.0, -75.0, "Summer", 100.0);
         System.out.println("Created location: " + location.getName());
         
-        LocationRepository repository = new LocationRepository();
-        // Don't actually add to repository to avoid file I/O in tests
+        // Don't actually create repository to avoid file I/O in tests
         
         System.out.println("Test 1 completed.\n");
     }

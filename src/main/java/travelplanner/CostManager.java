@@ -97,6 +97,24 @@ public class CostManager {
         
         return suggestions.toString();
     }
+    
+    /**
+     * Suggests cost-saving alternatives if budget is insufficient, with country and state information.
+     */
+    public String suggestCostSavingAlternatives(double availableBudget, double requiredBudget, Country country, State state) {
+        double shortfall = requiredBudget - availableBudget;
+        StringBuilder suggestions = new StringBuilder();
+        
+        suggestions.append("Budget shortfall of $").append(String.format("%.2f", shortfall)).append(". Suggestions:\n");
+        suggestions.append("1. Consider a budget hotel instead of luxury accommodation\n");
+        suggestions.append("2. Choose public transport (bus/train) instead of flights/cars\n");
+        suggestions.append("3. Reduce trip duration by 1-2 days\n");
+        suggestions.append("4. Limit shopping expenses\n");
+        suggestions.append("5. Pack more meals instead of dining out\n");
+        suggestions.append("6. Consider alternative destinations in ").append(state.getName()).append(", ").append(country.getName()).append("\n");
+        
+        return suggestions.toString();
+    }
 
     /**
      * Calculates sustainability score based on transport mode and other factors.

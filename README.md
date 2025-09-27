@@ -23,15 +23,18 @@ This is a Smart Travel Planner web application built with Java backend, aligned 
    - Uses Polymorphism for cost calculation with different hotel classes and transport modes
    - Integrates with Planner to update cost dynamically
 
-### Extra Features
+### Enhanced Features
 
-- User Preferences & Customization
-- Trip Rating & Sustainability Score
-- Weather & Season-based Suggestions
-- Emergency Cost Buffer
-- Trip History & Recommendations
-- Family Member Roles
-- Gamification (Eco-Points)
+1. **Country → State Selection with Routes & Costs**
+   - Hierarchical country-state-destination structure
+   - Route options with distance, time estimates, and costs
+   - Transport mode cost comparisons
+
+2. **Affordable Alternatives (Budget Check)**
+   - Budget comparison with estimated trip costs
+   - Alternative destination suggestions within budget
+   - Affordable hotel, food, and transport options
+   - Custom exceptions for insufficient funds scenarios
 
 ## Java OOP Concepts Demonstrated
 
@@ -51,14 +54,19 @@ src/main/java/travelplanner/
 ├── BudgetHotel.java          # Budget hotel implementation
 ├── CityPlan.java             # City plan implementation
 ├── CostManager.java          # Cost calculation and management
+├── Country.java              # Country class
+├── CountryRepository.java    # Repository for managing country data
 ├── InsufficientFundsException.java  # Custom exception for budget issues
 ├── InvalidDestinationException.java # Custom exception for invalid destinations
 ├── Location.java             # Location/destination class
 ├── LocationRepository.java   # Repository for managing locations
 ├── LuxuryHotel.java          # Luxury hotel implementation
+├── NoAffordableDestinationException.java # Custom exception for no affordable destinations
 ├── Person.java               # Person/family member class
 ├── Plan.java                 # Abstract plan class
+├── Route.java                # Route class
 ├── StandardHotel.java        # Standard hotel implementation
+├── State.java                # State/region class
 ├── TourPlan.java             # Tour plan implementation
 ├── TransportMode.java        # Transport mode enumeration
 └── TravelPlanner.java        # Main application class

@@ -1,0 +1,6 @@
+India|Rajasthan
+India|Kerala
+USA|California
+USA|New York
+France|Paris Region
+France|Provence

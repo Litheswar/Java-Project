@@ -20,6 +20,12 @@ public class DBUtils {
                 while (rs.next()) {
                     result.add(rs.getString("name"));
                 }
+            }
+        } catch (SQLException ex) {
+            // Swallow for now, higher layers may fallback to file-based suggestion
+        }
+        return result;
+    }
 
     // Returns list of country names from DB. Falls back to empty list on failure.
     public static List<String> getAllCountries() {
@@ -54,7 +60,7 @@ public class DBUtils {
     // Returns destinations for a state with an average cost estimate per destination name.
     // Format each entry as "name|avg_cost" to keep it generic for console rendering.
     public static List<String> getDestinationsByState(String state) {
-        String sql = "SELECT d.name, AVG(d.cost_estimate) AS avg_cost FROM destinations d \n" +
+        String sql = "SELECT d.name, AVG(d.cost_estimate) AS avg_cost FROM destinations d " +
                 "JOIN states s ON d.state_id = s.id WHERE s.name = ? GROUP BY d.name ORDER BY d.name";
         List<String> destinations = new ArrayList<>();
         try (Connection con = DBConnection.getConnection();
@@ -71,12 +77,6 @@ public class DBUtils {
             System.out.println("Error fetching destinations for state '" + state + "': " + e.getMessage());
         }
         return destinations;
-    }
-            }
-        } catch (SQLException ex) {
-            // Swallow for now, higher layers may fallback to file-based suggestion
-        }
-        return result;
     }
 
     public static List<String> listStatesByCountry(String country) {

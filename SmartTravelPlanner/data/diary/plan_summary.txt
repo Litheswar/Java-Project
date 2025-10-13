@@ -82,3 +82,32 @@ Suggested Affordable Destinations:
 Plan Steps:
 1. Start → Darwin (0 km, Cost: ₹6000.0, Mode: road, Duration: 60m)
 
+==============================
+ SMART TRAVEL PLANNER 3.0
+==============================
+
+Traveler: lily (Age 22)
+Family Members: 3
+Country: Italy
+State: Lazio
+Destination: Rome
+Trip Duration: 4 days
+Meals per Day: 3
+
+--- Expense Breakdown ---
+Travel: ₹7600
+Food: ₹9450
+Stay: ₹9600
+Shopping: ₹600
+Leisure/Entertainment: ₹1524
+Local Commute: ₹380
+--------------------------
+Total Estimated: ₹29154
+Your Budget: ₹500000
+Sustainability Score: 9/10
+
+Estimated CO₂ footprint: 95 kg
+
+Plan Steps:
+1. Rome → Venice (525 km, Cost: ₹8000.0, Mode: train, Duration: 210m)
+

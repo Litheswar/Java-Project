@@ -1,0 +1,84 @@
+==============================
+ SMART TRAVEL PLANNER 2.0
+==============================
+
+Traveler: yyy (Age 88)
+Family Members: 5
+Country: india
+State: Kerala
+Destination: Munnar
+Trip Duration: 5 days
+Meals per Day: 9
+
+--- Expense Breakdown ---
+Travel: ₹1890
+Food: ₹38250
+Stay: ₹17000
+Shopping: ₹1000
+--------------------------
+Total Estimated: ₹58140
+Your Budget: ₹7
+Sustainability Score: 8/10
+
+Plan Steps:
+1. Munnar → Thekkady (90 km, Cost: ₹1800.0, Mode: road, Duration: 90m)
+
+==============================
+ SMART TRAVEL PLANNER 2.0
+==============================
+
+Traveler: lithu (Age 55)
+Family Members: 9
+Country: India
+State: Tamil Nadu
+Destination: Ooty
+Trip Duration: 22 days
+Meals per Day: 3
+
+--- Expense Breakdown ---
+Travel: ₹3360
+Food: ₹112860
+Stay: ₹150480
+Shopping: ₹1800
+--------------------------
+Total Estimated: ₹268500
+Your Budget: ₹5555555
+Sustainability Score: 8/10
+
+Plan Steps:
+1. Start → Ooty (0 km, Cost: ₹3200.0, Mode: road, Duration: 60m)
+
+==============================
+ SMART TRAVEL PLANNER 3.0
+==============================
+
+Traveler: ttt (Age 56)
+Family Members: 8
+Country: Australia
+State: Northern Territory
+Destination: Darwin
+Trip Duration: 12 days
+Meals per Day: 3
+
+--- Expense Breakdown ---
+Travel: ₹6048
+Food: ₹72230
+Stay: ₹87552
+Shopping: ₹1600
+Leisure/Entertainment: ₹12783
+Local Commute: ₹302
+--------------------------
+Total Estimated: ₹180515
+Your Budget: ₹50000
+Sustainability Score: 8/10
+
+Estimated CO₂ footprint: 0 kg
+
+Suggested Affordable Destinations:
+→ Hobart (₹5600)
+→ Canberra (₹5700)
+→ Adelaide (₹5900)
+
+Plan Steps:
+1. Start → Darwin (0 km, Cost: ₹6000.0, Mode: road, Duration: 60m)
+

@@ -1,0 +1,18 @@
+# city|activity
+Ooty|Visit Botanical Gardens
+Ooty|Boat ride at Ooty Lake
+Ooty|Explore Doddabetta Peak
+Kochi|Chinese Fishing Nets at Fort Kochi
+Kochi|Sunset at Marine Drive
+Munnar|Trek through tea plantations
+Thekkady|Periyar Wildlife Sanctuary boat safari
+Chennai|Marina Beach sunrise walk
+Mumbai|Gateway of India and Colaba Causeway
+Jaipur|Amer Fort and Hawa Mahal
+Udaipur|Boat ride on Lake Pichola
+Paris|Eiffel Tower night view
+Rome|Colosseum guided tour
+Tokyo|Shibuya Crossing and Meiji Shrine
+Kyoto|Fushimi Inari Taisha hike
+Sydney|Sydney Opera House tour
+Dubai|Desert safari and dune bashing

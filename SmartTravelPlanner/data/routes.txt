@@ -1,0 +1,17 @@
+# fromCity|toCity|distanceKm|travelCost
+Kochi|Munnar|130|2500
+Munnar|Thekkady|90|1800
+Chennai|Ooty|555|4200
+Mumbai|Ooty|1030|7600
+
+# Extended routes with mode and duration: fromCity|toCity|distanceKm|travelCost|mode|durationMinutes
+Paris|Lyon|465|6500|train|150
+Paris|Nice|930|12000|air|100
+Rome|Venice|525|8000|train|210
+Tokyo|Kyoto|450|9000|train|160
+Tokyo|Osaka|515|10000|train|180
+Sydney|Melbourne|878|14000|air|95
+Dubai|Abu Dhabi|140|2500|road|100
+Los Angeles|San Francisco|615|11000|air|85
+New York City|Chicago|1145|18000|air|120
+Seattle|Honolulu|4330|38000|air|360

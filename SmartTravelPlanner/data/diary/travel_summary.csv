@@ -1,0 +1,4 @@
+timestamp,user,country,state,destination,estimated_cost,family_members,days,meals_per_day
+2025-10-13T22:14:03.166765800,yyy,india,Kerala,Munnar,58140.0,5,5,9
+2025-10-13T22:22:45.218628500,lithu,India,Tamil Nadu,Ooty,268500.0,9,22,3
+2025-10-13T23:05:22.144938400,ttt,Australia,Northern Territory,Darwin,180515.392,8,12,3

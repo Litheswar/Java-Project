@@ -1,5 +1,0 @@
-Paris|France|City of Light|48.8566|2.3522|Spring/Fall|150.0
-Tokyo|Japan|Modern metropolis|35.6762|139.6503|Spring/Fall|120.0
-New York|USA|The Big Apple|40.7128|-74.006|Spring/Fall|200.0
-London|UK|Historic capital|51.5074|-0.1278|Spring/Fall|130.0
-Sydney|Australia|Harbor city|-33.8688|151.2093|Spring/Fall|140.0

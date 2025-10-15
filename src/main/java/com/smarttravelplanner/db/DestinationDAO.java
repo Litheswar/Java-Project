@@ -145,6 +145,31 @@ public class DestinationDAO extends BaseDAO {
     }
     
     // Backward compatibility method
+    public List<String> getStatesWithBaseBudget(String country) throws SQLException {
+        List<String> states = new ArrayList<>();
+        String sql = "SELECT s.name, s.base_budget " +
+                     "FROM states s " +
+                     "JOIN countries c ON s.country_id = c.id " +
+                     "WHERE c.name = ? " +
+                     "ORDER BY s.name";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, country);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String stateInfo = rs.getString("name") + " (Base Budget: ₹" + 
+                                      String.format("%.0f", rs.getDouble("base_budget")) + ")";
+                    states.add(stateInfo);
+                }
+            }
+        }
+        return states;
+    }
+    
+    // Backward compatibility method
     public List<Destination> getSustainableDestinations(int minScore) throws SQLException {
         List<Destination> destinations = new ArrayList<>();
         String sql = "SELECT d.*, s.name as state_name, c.name as country_name " +

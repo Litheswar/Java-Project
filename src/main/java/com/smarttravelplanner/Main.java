@@ -528,11 +528,13 @@ public class Main {
             // Suggest affordable destinations
             try {
                 DestinationDAO destinationDAO = new DestinationDAO();
-                List<String> affordableDestinations = destinationDAO.getAffordableDestinations(traveler.getBudget());
+                List<Destination> affordableDestinations = destinationDAO.getAffordableDestinations(traveler.getBudget());
                 if (!affordableDestinations.isEmpty()) {
                     System.out.println("\n💰 Affordable destinations within your budget:");
                     for (int i = 0; i < Math.min(5, affordableDestinations.size()); i++) {
-                        System.out.println("  " + affordableDestinations.get(i));
+                        Destination dest = affordableDestinations.get(i);
+                        System.out.println("  " + dest.getCountry() + " - " + dest.getState() + " - " + dest.getCity() + 
+                                         " (Cost: ₹" + String.format("%.0f", dest.getBaseCost()) + ")");
                     }
                 }
             } catch (SQLException e) {

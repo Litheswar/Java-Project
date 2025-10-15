@@ -1,5 +1,6 @@
 package com.smarttravelplanner;
 
+import com.smarttravelplanner.db.*;
 import com.smarttravelplanner.exceptions.BudgetExceededException;
 import com.smarttravelplanner.exceptions.InvalidAgeException;
 import com.smarttravelplanner.exceptions.InvalidFamilyCountException;
@@ -9,6 +10,7 @@ import com.smarttravelplanner.service.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.sql.SQLException;
 
 public class Main {
     private static Scanner scanner = new Scanner(System.in);
@@ -21,6 +23,14 @@ public class Main {
         System.out.println("    SMART TRAVEL PLANNER 3.0");
         System.out.println("==============================");
 
+        // Initialize the database
+        try {
+            DatabaseInitializer.initializeDatabase();
+        } catch (Exception e) {
+            System.err.println("Failed to initialize database: " + e.getMessage());
+            System.out.println("Continuing with file-based storage...");
+        }
+
         boolean continuePlanning = true;
 
         while (continuePlanning) {
@@ -31,8 +41,8 @@ public class Main {
                 // Step 2: Trip Configuration
                 TripConfiguration tripConfig = configureTrip();
 
-                // Step 3: State & Destination Preview
-                previewDestinations(tripConfig.getCountry());
+                // Step 3: State & Destination Preview (using database)
+                previewDestinationsFromDatabase(tripConfig.getCountry());
 
                 // Step 4: Travel, Stay & Meal Selection
                 String travelMode = selectTravelMode();
@@ -189,6 +199,19 @@ public class Main {
             }
         }
 
+        // Validate inputs using the database utility
+        if (!InputValidator.isValidAge(age)) {
+            throw new InvalidAgeException("Age must be between 1 and 120");
+        }
+        
+        if (!InputValidator.isValidFamilyCount(familyCount)) {
+            throw new InvalidFamilyCountException("Family count must be between 1 and 10");
+        }
+        
+        if (!InputValidator.isValidBudget(budget)) {
+            throw new InvalidInputException("Budget must be non-negative");
+        }
+
         return new Traveler(name, age, familyCount, budget);
     }
 
@@ -229,6 +252,15 @@ public class Main {
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a valid number.");
             }
+        }
+
+        // Validate inputs using the database utility
+        if (!InputValidator.isValidTripDays(tripDays)) {
+            System.out.println("Warning: Trip days should be between 1 and 50.");
+        }
+        
+        if (!InputValidator.isValidMealsPerDay(mealsPerDay)) {
+            System.out.println("Warning: Meals per day should be between 1 and 5.");
         }
 
         // Show available countries and let user select
@@ -273,9 +305,37 @@ public class Main {
         return countries;
     }
 
-    private static void previewDestinations(String country) {
-        System.out.println("\nStates in " + country + ":");
+    private static void previewDestinationsFromDatabase(String country) {
+        System.out.println("\nStates in " + country + " (from database):");
 
+        try {
+            DestinationDAO destinationDAO = new DestinationDAO();
+            List<String> stateBudgets = destinationDAO.getStatesWithBaseBudget(country);
+            
+            if (stateBudgets.isEmpty()) {
+                System.out.println("No states found for " + country + " in the database.");
+                return;
+            }
+
+            System.out.println("Would you like to preview all states with their base budget? (Y/N): ");
+            String previewChoice = scanner.nextLine();
+
+            if ("Y".equalsIgnoreCase(previewChoice) || "YES".equalsIgnoreCase(previewChoice)) {
+                for (int i = 0; i < stateBudgets.size(); i++) {
+                    System.out.println((i + 1) + ". " + stateBudgets.get(i));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Database error while fetching state budgets: " + e.getMessage());
+            System.out.println("Using fallback data...");
+            previewDestinations(country); // Fallback to original method
+        }
+
+        System.out.println("Press Enter to continue...");
+        scanner.nextLine();
+    }
+
+    private static void previewDestinations(String country) {
         // Sample state data for demonstration
         List<State> states = new ArrayList<>();
         switch (country) {
@@ -443,11 +503,41 @@ public class Main {
         System.out.println("Estimated cost: ₹" + String.format("%.0f", totalCost));
         System.out.println("Your budget: ₹" + String.format("%.0f", traveler.getBudget()));
 
-        if (!costManager.isBudgetSufficient(totalCost, traveler.getBudget())) {
+        // Check if budget is sufficient using the database utility
+        if (!InputValidator.isBudgetSufficient(traveler.getBudget(), totalCost)) {
             double difference = totalCost - traveler.getBudget();
             System.out.println("\n⚠️ Budget exceeded by ₹" + String.format("%.0f", difference) +
                     ". Estimated cost ₹" + String.format("%.0f", totalCost) +
                     " exceeds your budget of ₹" + String.format("%.0f", traveler.getBudget()) + ".");
+
+            // Generate alerts for the trip configuration
+            List<String> alerts = AlertGenerator.generateAllAlerts(
+                tripConfig.getMealsPerDay(),
+                "Standard", // Default stay type
+                "Road", // Default travel mode
+                tripConfig.getTripDays()
+            );
+            
+            if (!alerts.isEmpty()) {
+                System.out.println("\n⚠️ Alerts for your trip configuration:");
+                for (String alert : alerts) {
+                    System.out.println("  - " + alert);
+                }
+            }
+
+            // Suggest affordable destinations
+            try {
+                DestinationDAO destinationDAO = new DestinationDAO();
+                List<String> affordableDestinations = destinationDAO.getAffordableDestinations(traveler.getBudget());
+                if (!affordableDestinations.isEmpty()) {
+                    System.out.println("\n💰 Affordable destinations within your budget:");
+                    for (int i = 0; i < Math.min(5, affordableDestinations.size()); i++) {
+                        System.out.println("  " + affordableDestinations.get(i));
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("Database error while fetching affordable destinations: " + e.getMessage());
+            }
 
             System.out.println("\nOptions:");
             System.out.println("1. Increase your budget");
@@ -503,6 +593,10 @@ public class Main {
         System.out.println("\n=== Smart Optimizer ===");
         String optimizationMessage = smartOptimizer.optimizePlan(planner, traveler, estimatedCost);
         System.out.println(optimizationMessage);
+        
+        // Get route optimization suggestion
+        String suggestion = RouteOptimizer.getOptimizationSuggestion("cost", new ArrayList<>());
+        System.out.println("💡 Optimization suggestion: " + suggestion);
     }
 
     private static void recommendTravelCompanion(Traveler traveler) {
@@ -557,6 +651,11 @@ public class Main {
         report.setScore(score);
         report.setCo2Footprint(co2Footprint);
         report.setTips(tips);
+
+        // Add CO2 calculation using the database utility
+        double co2 = CO2Calculator.calculateCO2Footprint(travelMode, 7, 2); // Default values for demo
+        System.out.println("🌍 Estimated CO2 footprint: " + String.format("%.2f", co2) + " kg");
+        System.out.println("💡 Sustainability tip: " + CO2Calculator.getSustainabilityTip(co2));
 
         return report;
     }
@@ -618,6 +717,17 @@ public class Main {
         System.out.println("  Travel Mode: " + travelMode);
         System.out.println("  Stay Type: " + stayType);
         System.out.println("  Meal Type: " + mealType);
+        
+        // Expense calculation using the database utility
+        double travelExpense = ExpenseCalculator.calculateTravelExpense(5000.0, tripConfig.getTripDays(), traveler.getFamilyCount());
+        double foodExpense = ExpenseCalculator.calculateFoodExpense(tripConfig.getMealsPerDay(), tripConfig.getTripDays(), traveler.getFamilyCount());
+        double stayExpense = ExpenseCalculator.calculateStayExpense(tripConfig.getTripDays(), traveler.getFamilyCount(), stayType);
+        
+        System.out.println("\n💰 Detailed Expense Breakdown:");
+        System.out.println("  Travel: ₹" + String.format("%.0f", travelExpense));
+        System.out.println("  Food: ₹" + String.format("%.0f", foodExpense));
+        System.out.println("  Stay: ₹" + String.format("%.0f", stayExpense));
+        System.out.println("  Other (Shopping, Leisure): ₹" + String.format("%.0f", totalCost - travelExpense - foodExpense - stayExpense));
     }
     
     private static boolean handleEndOfFlow() {

@@ -1,26 +1,53 @@
 package com.smarttravelplanner.model;
 
+import java.sql.Timestamp;
+import java.util.UUID;
+
 public class User {
+    private UUID id;
     private String name;
-    private String email;
+    private int age;
+    private int familyCount;
     private double budget;
-    private int familySize;
-    private String travelMode;
+    private String email;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
     
     // Default constructor
     public User() {
     }
     
-    // Parameterized constructor
-    public User(String name, String email, double budget, int familySize, String travelMode) {
+    // Constructor without ID (for creating new users)
+    public User(String name, int age, int familyCount, double budget, String email) {
         this.name = name;
-        this.email = email;
+        this.age = age;
+        this.familyCount = familyCount;
         this.budget = budget;
-        this.familySize = familySize;
-        this.travelMode = travelMode;
+        this.email = email;
+    }
+    
+    // Constructor with all fields (for reading from database)
+    public User(UUID id, String name, int age, int familyCount, double budget, String email, 
+               Timestamp createdAt, Timestamp updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+        this.familyCount = familyCount;
+        this.budget = budget;
+        this.email = email;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
     
     // Getters and Setters
+    public UUID getId() {
+        return id;
+    }
+    
+    public void setId(UUID id) {
+        this.id = id;
+    }
+    
     public String getName() {
         return name;
     }
@@ -29,12 +56,20 @@ public class User {
         this.name = name;
     }
     
-    public String getEmail() {
-        return email;
+    public int getAge() {
+        return age;
     }
     
-    public void setEmail(String email) {
-        this.email = email;
+    public void setAge(int age) {
+        this.age = age;
+    }
+    
+    public int getFamilyCount() {
+        return familyCount;
+    }
+    
+    public void setFamilyCount(int familyCount) {
+        this.familyCount = familyCount;
     }
     
     public double getBudget() {
@@ -45,30 +80,39 @@ public class User {
         this.budget = budget;
     }
     
-    public int getFamilySize() {
-        return familySize;
+    public String getEmail() {
+        return email;
     }
     
-    public void setFamilySize(int familySize) {
-        this.familySize = familySize;
+    public void setEmail(String email) {
+        this.email = email;
     }
     
-    public String getTravelMode() {
-        return travelMode;
+    public Timestamp getCreatedAt() {
+        return createdAt;
     }
     
-    public void setTravelMode(String travelMode) {
-        this.travelMode = travelMode;
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+    
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
     }
     
     @Override
     public String toString() {
         return "User{" +
-                "name='" + name + '\'' +
-                ", email='" + email + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", familyCount=" + familyCount +
                 ", budget=" + budget +
-                ", familySize=" + familySize +
-                ", travelMode='" + travelMode + '\'' +
+                ", email='" + email + '\'' +
                 '}';
     }
 }

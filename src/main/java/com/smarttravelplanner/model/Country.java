@@ -1,22 +1,38 @@
 package com.smarttravelplanner.model;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Country {
+    private int id;
     private String name;
-    private List<State> states;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
     
     public Country() {
-        this.states = new ArrayList<>();
     }
     
     public Country(String name) {
         this.name = name;
-        this.states = new ArrayList<>();
+    }
+    
+    public Country(int id, String name, Timestamp createdAt, Timestamp updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
     
     // Getters and Setters
+    public int getId() {
+        return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public String getName() {
         return name;
     }
@@ -25,20 +41,24 @@ public class Country {
         this.name = name;
     }
     
-    public List<State> getStates() {
-        return new ArrayList<>(states);
+    public Timestamp getCreatedAt() {
+        return createdAt;
     }
     
-    public void addState(State state) {
-        this.states.add(state);
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
     
-    public void setStates(List<State> states) {
-        this.states = new ArrayList<>(states);
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+    
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
     }
     
     @Override
     public String toString() {
-        return "Country{name='" + name + '\'' + ", states=" + states.size() + " states}";
+        return "Country{id=" + id + ", name='" + name + '\'' + '}';
     }
 }

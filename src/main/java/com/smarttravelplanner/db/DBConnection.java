@@ -5,9 +5,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL = "jdbc:postgresql://localhost:5432/smart_travel_db";
-    private static final String USER = "postgres"; // Update with your PostgreSQL username
-    private static final String PASSWORD = "password"; // Update with your PostgreSQL password
+    private static final String URL = System.getenv("DB_URL") != null ? 
+        System.getenv("DB_URL") : "jdbc:postgresql://localhost:5432/smart_travel_db";
+    private static final String USER = System.getenv("DB_USER") != null ? 
+        System.getenv("DB_USER") : "postgres";
+    private static final String PASSWORD = System.getenv("DB_PASSWORD") != null ? 
+        System.getenv("DB_PASSWORD") : "Lithu19!";
     
     private static Connection connection = null;
     

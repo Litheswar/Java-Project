@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.smarttravelplanner.service.PlannerServiceTest
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in com.smarttravelplanner.service.PlannerServiceTest

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   UserIcon, 
@@ -16,19 +16,55 @@ import Button from '../components/Button';
 import TravelPersona from '../components/TravelPersona';
 import BadgeProgress from '../components/BadgeProgress';
 import WorldMap from '../components/WorldMap';
-import {
-  mockUser,
-  mockTrips,
-  mockChartData
-} from '../assets/mockData';
+import { userService } from '../services/userService';
+import { tripService } from '../services/tripService';
+import { tripHistoryService } from '../services/tripHistoryService';
+import { useAppContext } from '../context/AppContext';
 
 const ProfilePage = () => {
+  const { user: contextUser, updateUser } = useAppContext();
   const [activeTab, setActiveTab] = useState('overview');
+  const [user, setUser] = useState(contextUser);
+  const [trips, setTrips] = useState([]);
+  const [tripHistory, setTripHistory] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   
-  const completedTrips = mockTrips.filter(trip => trip.status === 'completed');
-  const totalCO2Saved = completedTrips.reduce((sum, trip) => sum + trip.co2Saved, 0);
+  // Fetch user data, trips, and trip history when component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch user data
+        const userData = await userService.getUserById(contextUser.id);
+        setUser(userData);
+        updateUser(userData);
+        
+        // Fetch trips for the user
+        const tripsData = await tripService.getTripsByUserId(contextUser.id);
+        setTrips(tripsData);
+        
+        // Fetch trip history for the user
+        const tripHistoryData = await tripHistoryService.getTripHistoryByUserId(contextUser.id);
+        setTripHistory(tripHistoryData);
+        
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching profile data:', err);
+        setError('Failed to load profile data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [contextUser.id, updateUser]);
   
-  // Mock destinations for the world map
+  const completedTrips = trips.filter(trip => trip.status === 'completed');
+  const totalCO2Saved = completedTrips.reduce((sum, trip) => sum + (trip.co2Saved || 0), 0);
+  
+  // Mock destinations for the world map (in a real app, this would come from the API)
   const destinations = [
     {
       id: 1,
@@ -70,6 +106,25 @@ const ProfilePage = () => {
     { id: 'achievements', name: 'Achievements' }
   ];
   
+  if (loading) {
+    return (
+      <div className="py-8 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="py-8 flex justify-center items-center h-64">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error! </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      </div>
+    );
+  }
+  
   const renderOverview = () => (
     <div className="space-y-8">
       {/* User Info and Travel Persona */}
@@ -78,10 +133,10 @@ const ProfilePage = () => {
           <Card>
             <div className="flex flex-col items-center text-center">
               <div className="bg-gradient-to-r from-primary to-secondary w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                {mockUser.avatar}
+                {user.avatar || user.name.charAt(0)}
               </div>
-              <h2 className="mt-4 text-2xl font-bold text-gray-900">{mockUser.name}</h2>
-              <p className="text-gray-600">{mockUser.email}</p>
+              <h2 className="mt-4 text-2xl font-bold text-gray-900">{user.name}</h2>
+              <p className="text-gray-600">{user.email}</p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                   <MapPinIcon className="h-4 w-4 mr-1" />
@@ -100,10 +155,10 @@ const ProfilePage = () => {
           
           <div className="mt-6">
             <TravelPersona 
-              persona={mockUser.travelPersona || "Eco Explorer"}
-              ecoScore={mockUser.ecoScore}
-              travelPoints={mockUser.travelPoints}
-              streak={mockUser.streak}
+              persona={user.travelPersona || "Eco Explorer"}
+              ecoScore={user.ecoScore || 0}
+              travelPoints={user.travelPoints || 0}
+              streak={user.streak || 0}
             />
           </div>
         </div>
@@ -118,7 +173,7 @@ const ProfilePage = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-sm font-medium text-gray-600">Total Trips</h3>
-                  <p className="text-2xl font-bold text-gray-900">{mockTrips.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{trips.length}</p>
                 </div>
               </div>
             </Card>
@@ -142,7 +197,7 @@ const ProfilePage = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-sm font-medium text-gray-600">Travel Points</h3>
-                  <p className="text-2xl font-bold text-gray-900">{mockUser.travelPoints}</p>
+                  <p className="text-2xl font-bold text-gray-900">{user.travelPoints || 0}</p>
                 </div>
               </div>
             </Card>
@@ -154,7 +209,7 @@ const ProfilePage = () => {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-sm font-medium text-gray-600">Current Streak</h3>
-                  <p className="text-2xl font-bold text-gray-900">{mockUser.streak} days</p>
+                  <p className="text-2xl font-bold text-gray-900">{user.streak || 0} days</p>
                 </div>
               </div>
             </Card>
@@ -162,61 +217,10 @@ const ProfilePage = () => {
           
           {/* Badge Progress */}
           <BadgeProgress 
-            currentBadges={mockUser.badges}
+            currentBadges={user.badges || []}
             progress={75}
           />
         </div>
-      </div>
-      
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <div className="flex items-center">
-            <div className="flex-shrink-0 p-3 rounded-lg bg-blue-100">
-              <MapPinIcon className="h-6 w-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-600">Total Trips</h3>
-              <p className="text-2xl font-bold text-gray-900">{mockTrips.length}</p>
-            </div>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center">
-            <div className="flex-shrink-0 p-3 rounded-lg bg-green-100">
-              <SparklesIcon className="h-6 w-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-600">CO₂ Saved</h3>
-              <p className="text-2xl font-bold text-gray-900">{totalCO2Saved} kg</p>
-            </div>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center">
-            <div className="flex-shrink-0 p-3 rounded-lg bg-yellow-100">
-              <TrophyIcon className="h-6 w-6 text-yellow-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-600">Travel Points</h3>
-              <p className="text-2xl font-bold text-gray-900">{mockUser.travelPoints}</p>
-            </div>
-          </div>
-        </Card>
-        
-        <Card>
-          <div className="flex items-center">
-            <div className="flex-shrink-0 p-3 rounded-lg bg-red-100">
-              <FireIcon className="h-6 w-6 text-red-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-600">Current Streak</h3>
-              <p className="text-2xl font-bold text-gray-900">{mockUser.streak} days</p>
-            </div>
-          </div>
-        </Card>
       </div>
       
       {/* Destinations Map */}
@@ -237,7 +241,7 @@ const ProfilePage = () => {
         </div>
         
         <div className="space-y-4">
-          {mockTrips.slice(0, 3).map((trip) => (
+          {trips.slice(0, 3).map((trip) => (
             <div key={trip.id} className="flex items-center p-4 hover:bg-gray-50 rounded-lg">
               <div className="flex-shrink-0">
                 <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
@@ -253,10 +257,10 @@ const ProfilePage = () => {
               <div className="flex flex-col items-end">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   <SparklesIcon className="h-3 w-3 mr-1" />
-                  {trip.co2Saved} kg saved
+                  {trip.co2Saved || 0} kg saved
                 </span>
                 <p className="mt-1 text-sm text-gray-500">
-                  ${trip.spent} of ${trip.budget}
+                  ${trip.spent || 0} of ${trip.budget || 0}
                 </p>
               </div>
             </div>
@@ -268,22 +272,22 @@ const ProfilePage = () => {
   
   const renderStats = () => (
     <div className="space-y-8">
-      {/* Eco Impact Chart */}
+      {/* Eco Impact Chart - in a real app, this would come from the API */}
       <Card>
         <Chart 
           title="Eco Impact Over Time"
-          data={mockChartData.ecoImpact}
+          data={[]} // This would be populated with real data
           type="line"
           dataKey="month"
           height={400}
         />
       </Card>
       
-      {/* Spending Chart */}
+      {/* Spending Chart - in a real app, this would come from the API */}
       <Card>
         <Chart 
           title="Spending by Category"
-          data={mockChartData.expensesByCategory}
+          data={[]} // This would be populated with real data
           type="bar"
           dataKey="name"
           height={400}
@@ -315,7 +319,7 @@ const ProfilePage = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {mockTrips.map((trip) => (
+              {trips.map((trip) => (
                 <tr key={trip.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {trip.name}
@@ -327,11 +331,11 @@ const ProfilePage = () => {
                     {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${trip.spent} of ${trip.budget}
+                    ${trip.spent || 0} of ${trip.budget || 0}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {trip.co2Saved} kg
+                      {trip.co2Saved || 0} kg
                     </span>
                   </td>
                 </tr>
@@ -349,7 +353,7 @@ const ProfilePage = () => {
       <Card>
         <h2 className="text-lg font-medium text-gray-900 mb-6">Your Badges</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockUser.badges.map((badge) => (
+          {(user.badges || []).map((badge) => (
             <div key={badge.id} className="flex items-center p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg">
               <div className="flex-shrink-0 text-2xl">
                 {badge.icon}
@@ -369,13 +373,13 @@ const ProfilePage = () => {
         <div className="space-y-6">
           <div>
             <div className="flex justify-between text-sm font-medium text-gray-700">
-              <span>Eco Score: {mockUser.ecoScore}/100</span>
+              <span>Eco Score: {user.ecoScore || 0}/100</span>
               <span>Expert Level</span>
             </div>
             <div className="mt-2 w-full bg-gray-200 rounded-full h-4">
               <div 
                 className="bg-gradient-to-r from-green-400 to-green-600 h-4 rounded-full" 
-                style={{ width: `${mockUser.ecoScore}%` }}
+                style={{ width: `${user.ecoScore || 0}%` }}
               ></div>
             </div>
           </div>
@@ -389,13 +393,13 @@ const ProfilePage = () => {
             
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <MapPinIcon className="h-8 w-8 text-blue-600 mx-auto" />
-              <h3 className="mt-2 text-lg font-medium text-gray-900">{mockTrips.length}</h3>
+              <h3 className="mt-2 text-lg font-medium text-gray-900">{trips.length}</h3>
               <p className="text-sm text-gray-500">Sustainable Trips</p>
             </div>
             
             <div className="text-center p-4 bg-yellow-50 rounded-lg">
               <FireIcon className="h-8 w-8 text-yellow-600 mx-auto" />
-              <h3 className="mt-2 text-lg font-medium text-gray-900">{mockUser.streak}</h3>
+              <h3 className="mt-2 text-lg font-medium text-gray-900">{user.streak || 0}</h3>
               <p className="text-sm text-gray-500">Day Streak</p>
             </div>
           </div>

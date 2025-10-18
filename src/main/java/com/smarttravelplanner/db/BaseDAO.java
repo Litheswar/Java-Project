@@ -1,5 +1,8 @@
 package com.smarttravelplanner.db;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -8,19 +11,15 @@ import java.sql.SQLException;
  */
 public abstract class BaseDAO {
     
+    @Autowired
+    protected DataSource dataSource;
+    
     /**
      * Gets a database connection
      * @return Connection object
      * @throws SQLException if connection fails
      */
     protected Connection getConnection() throws SQLException {
-        return DBConnection.getConnection();
-    }
-    
-    /**
-     * Closes the database connection
-     */
-    protected void closeConnection() {
-        DBConnection.closeConnection();
+        return dataSource.getConnection();
     }
 }

@@ -28,7 +28,7 @@ public class DatabaseInitializerTest {
      * Verifies that the database was initialized correctly.
      */
     private static void verifyDatabaseInitialization() throws SQLException {
-        try (Connection connection = DBConnection.getConnection()) {
+        try (Connection connection = DBConnection.createConnection()) {
             // Check that tables exist
             checkTableExists(connection, "users");
             checkTableExists(connection, "countries");

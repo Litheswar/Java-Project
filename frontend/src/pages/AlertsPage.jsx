@@ -12,84 +12,105 @@ import {
 } from '@heroicons/react/24/outline';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import {
-  mockAlerts
-} from '../assets/mockData';
+import { alertService } from '../services/alertService';
+import { useAppContext } from '../context/AppContext';
 
 const AlertsPage = () => {
+  const { user } = useAppContext();
   const [alerts, setAlerts] = useState([]);
   const [filter, setFilter] = useState('all');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   
+  // Fetch alerts when component mounts
   useEffect(() => {
-    setAlerts(mockAlerts);
-  }, []);
+    const fetchAlerts = async () => {
+      try {
+        setLoading(true);
+        const alertsData = await alertService.getAlertsByUserId(user.id);
+        setAlerts(alertsData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching alerts:', err);
+        setError('Failed to load alerts. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchAlerts();
+  }, [user.id]);
   
-  // Mock countdown alerts
-  const countdownAlerts = [
-    {
-      id: 4,
-      type: "info",
-      title: "Trip Countdown",
-      message: "Your trip to Swiss Alps starts in 3 days. Don't forget to pack your hiking boots!",
-      date: "2023-08-07",
-      read: false,
-      countdown: 3
-    },
-    {
-      id: 5,
-      type: "info",
-      title: "Trip Countdown",
-      message: "Your trip to Bali starts in 15 days. Time to research local customs and attractions.",
-      date: "2023-07-17",
-      read: false,
-      countdown: 15
+  const markAsRead = async (id) => {
+    try {
+      // Update alert via API
+      await alertService.updateAlert({ id, read: true });
+      
+      // Update local state
+      setAlerts(prev => prev.map(alert => 
+        alert.id === id ? { ...alert, read: true } : alert
+      ));
+    } catch (error) {
+      console.error('Error marking alert as read:', error);
+      alert('Failed to mark alert as read. Please try again.');
     }
-  ];
+  };
   
-  // Mock eco-friendly suggestions
-  const ecoSuggestions = [
-    {
-      id: 6,
-      type: "success",
-      title: "Eco-Friendly Tip",
-      message: "For your upcoming trip to Swiss Alps, consider taking the train instead of flying to reduce your carbon footprint by 90%.",
-      date: "2023-07-20",
-      read: false
-    },
-    {
-      id: 7,
-      type: "success",
-      title: "Eco-Friendly Tip",
-      message: "When in Bali, choose locally-owned accommodations and restaurants to support the local economy.",
-      date: "2023-07-20",
-      read: false
+  const markAllAsRead = async () => {
+    try {
+      // Update all alerts via API
+      const unreadAlerts = alerts.filter(alert => !alert.read);
+      await Promise.all(unreadAlerts.map(alert => 
+        alertService.updateAlert({ id: alert.id, read: true })
+      ));
+      
+      // Update local state
+      setAlerts(prev => prev.map(alert => ({ ...alert, read: true })));
+    } catch (error) {
+      console.error('Error marking all alerts as read:', error);
+      alert('Failed to mark all alerts as read. Please try again.');
     }
-  ];
+  };
   
-  // Combine all alerts
-  const allAlerts = [...countdownAlerts, ...ecoSuggestions, ...mockAlerts];
+  const deleteAlert = async (id) => {
+    try {
+      // Delete alert via API
+      await alertService.deleteAlert(id);
+      
+      // Update local state
+      setAlerts(prev => prev.filter(alert => alert.id !== id));
+    } catch (error) {
+      console.error('Error deleting alert:', error);
+      alert('Failed to delete alert. Please try again.');
+    }
+  };
   
   const filteredAlerts = filter === 'all' 
-    ? allAlerts 
+    ? alerts 
     : filter === 'unread' 
-      ? allAlerts.filter(alert => !alert.read)
-      : allAlerts.filter(alert => alert.read);
+      ? alerts.filter(alert => !alert.read)
+      : alerts.filter(alert => alert.read);
   
-  const markAsRead = (id) => {
-    setAlerts(prev => prev.map(alert => 
-      alert.id === id ? { ...alert, read: true } : alert
-    ));
-  };
+  const unreadCount = alerts.filter(alert => !alert.read).length;
   
-  const markAllAsRead = () => {
-    setAlerts(prev => prev.map(alert => ({ ...alert, read: true })));
-  };
+  if (loading) {
+    return (
+      <div className="py-8 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
   
-  const deleteAlert = (id) => {
-    setAlerts(prev => prev.filter(alert => alert.id !== id));
-  };
-  
-  const unreadCount = allAlerts.filter(alert => !alert.read).length;
+  if (error) {
+    return (
+      <div className="py-8 flex justify-center items-center h-64">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error! </strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="py-8">
@@ -209,11 +230,7 @@ const AlertsPage = () => {
                         alert.type === 'success' ? 'bg-green-100 text-green-600' : 
                         'bg-blue-100 text-blue-600'
                       }`}>
-                        {alert.countdown ? (
-                          <ClockIcon className="h-6 w-6" />
-                        ) : alert.title.includes('Eco-Friendly') ? (
-                          <SparklesIcon className="h-6 w-6" />
-                        ) : alert.type === 'warning' ? (
+                        {alert.type === 'warning' ? (
                           <ExclamationTriangleIcon className="h-6 w-6" />
                         ) : alert.type === 'success' ? (
                           <CheckCircleIcon className="h-6 w-6" />
@@ -227,11 +244,6 @@ const AlertsPage = () => {
                             alert.read ? 'text-gray-900' : 'text-gray-900 font-bold'
                           }`}>
                             {alert.title}
-                            {alert.countdown && (
-                              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                {alert.countdown} days
-                              </span>
-                            )}
                           </h3>
                           <button
                             onClick={() => deleteAlert(alert.id)}

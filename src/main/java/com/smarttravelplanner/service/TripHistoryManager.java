@@ -1,7 +1,6 @@
 package com.smarttravelplanner.service;
 
 import com.smarttravelplanner.model.Traveler;
-import com.smarttravelplanner.utils.FilePersistence;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -9,10 +8,9 @@ import java.util.List;
 
 public class TripHistoryManager {
     private static final String TRIP_HISTORY_FILE = "data/trip_history.txt";
-    private FilePersistence filePersistence;
-    
+
     public TripHistoryManager() {
-        this.filePersistence = new FilePersistence();
+
     }
     
     /**

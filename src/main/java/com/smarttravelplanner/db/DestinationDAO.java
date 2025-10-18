@@ -1,12 +1,27 @@
 package com.smarttravelplanner.db;
 
 import com.smarttravelplanner.model.Destination;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DestinationDAO extends BaseDAO {
+@Repository
+public class DestinationDAO {
+    
+    private final DataSource dataSource;
+    
+    @Autowired
+    public DestinationDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+    
+    private Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
     
     /**
      * Creates a new destination in the database

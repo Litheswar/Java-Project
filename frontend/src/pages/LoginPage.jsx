@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 import { 
   ArrowLeftIcon, 
   UserIcon, 
@@ -13,6 +14,7 @@ import Card from '../components/Card';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -66,8 +68,20 @@ const LoginPage = () => {
     // Simulate API call
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      // Redirect to dashboard on successful login
-      navigate('/dashboard');
+      // Set user in auth context
+      signIn({
+        id: 1,
+        name: "Alex Johnson",
+        email: formData.email,
+        avatar: "AJ",
+        ecoScore: 85,
+        travelPoints: 1250,
+        streak: 7,
+        travelPersona: "Eco Explorer",
+        theme: "nature"
+      });
+      // Redirect to home page on successful login
+      navigate('/home');
     } catch (error) {
       setErrors({ general: 'Invalid email or password' });
     } finally {

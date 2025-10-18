@@ -9,7 +9,7 @@ public class SimpleDBTest {
         System.out.println("Testing database connection...");
         
         try {
-            Connection conn = DBConnection.getConnection();
+            Connection conn = DBConnection.createConnection();
             if (conn != null && !conn.isClosed()) {
                 System.out.println("Database connection successful!");
                 conn.close();

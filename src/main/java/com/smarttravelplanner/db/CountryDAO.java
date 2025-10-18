@@ -1,20 +1,36 @@
 package com.smarttravelplanner.db;
 
 import com.smarttravelplanner.model.Country;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class CountryDAO extends BaseDAO {
+@Repository
+public class CountryDAO {
+    
+    private final DataSource dataSource;
+    
+    @Autowired
+    public CountryDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+    
+    private Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
     
     /**
      * Creates a new country in the database
      * @param country The country to create
-     * @return The ID of the created country, or -1 if creation failed
+     * @return The ID of the created country, or null if creation failed
      * @throws SQLException if a database error occurs
      */
-    public int createCountry(Country country) throws SQLException {
+    public UUID createCountry(Country country) throws SQLException {
         String sql = "INSERT INTO countries (name) VALUES (?) RETURNING id";
         
         try (Connection conn = getConnection();
@@ -24,11 +40,11 @@ public class CountryDAO extends BaseDAO {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("id");
+                    return (UUID) rs.getObject("id");
                 }
             }
         }
-        return -1;
+        return null;
     }
     
     /**
@@ -37,13 +53,13 @@ public class CountryDAO extends BaseDAO {
      * @return The Country object, or null if not found
      * @throws SQLException if a database error occurs
      */
-    public Country getCountryById(int id) throws SQLException {
+    public Country getCountryById(UUID id) throws SQLException {
         String sql = "SELECT * FROM countries WHERE id = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, id);
+            stmt.setObject(1, id);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -110,7 +126,7 @@ public class CountryDAO extends BaseDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, country.getName());
-            stmt.setInt(2, country.getId());
+            stmt.setObject(2, country.getId());
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
@@ -123,13 +139,13 @@ public class CountryDAO extends BaseDAO {
      * @return true if the deletion was successful, false otherwise
      * @throws SQLException if a database error occurs
      */
-    public boolean deleteCountry(int id) throws SQLException {
+    public boolean deleteCountry(UUID id) throws SQLException {
         String sql = "DELETE FROM countries WHERE id = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, id);
+            stmt.setObject(1, id);
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         }
@@ -143,7 +159,7 @@ public class CountryDAO extends BaseDAO {
      */
     private Country mapResultSetToCountry(ResultSet rs) throws SQLException {
         return new Country(
-            rs.getInt("id"),
+            (UUID) rs.getObject("id"),
             rs.getString("name"),
             rs.getTimestamp("created_at"),
             rs.getTimestamp("updated_at")

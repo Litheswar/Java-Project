@@ -25,7 +25,7 @@ public class TableVerification {
     public static boolean verifyTables() {
         System.out.println("Verifying database tables...");
         
-        try (Connection connection = DBConnection.getConnection()) {
+        try (Connection connection = DBConnection.createConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
             
             boolean allTablesExist = true;

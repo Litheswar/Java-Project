@@ -1,13 +1,28 @@
 package com.smarttravelplanner.db;
 
 import com.smarttravelplanner.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class UserDAO extends BaseDAO {
+@Repository
+public class UserDAO {
+    
+    private final DataSource dataSource;
+    
+    @Autowired
+    public UserDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+    
+    private Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
     
     /**
      * Creates a new user in the database

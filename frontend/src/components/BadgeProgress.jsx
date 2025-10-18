@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { TrophyIcon } from '@heroicons/react/24/outline';
 
-const BadgeProgress = ({ currentBadges, nextBadge, progress }) => {
+const BadgeProgress = ({ currentBadges = [], nextBadge, progress = 0 }) => {
   const badges = [
     { id: 1, name: "First Trip", icon: "✈️", requirement: 1, description: "Complete your first trip" },
     { id: 2, name: "Eco Warrior", icon: "🌱", requirement: 50, description: "Save 50kg of CO2" },
@@ -13,9 +13,12 @@ const BadgeProgress = ({ currentBadges, nextBadge, progress }) => {
   ];
 
   const getNextBadge = () => {
+    // Handle case where currentBadges might be undefined
+    const badgesToCheck = currentBadges || [];
+    
     // Find the next badge the user hasn't achieved yet
     const next = badges.find(badge => 
-      !currentBadges.some(b => b.id === badge.id)
+      !badgesToCheck.some(b => b && b.id === badge.id)
     );
     return next || badges[badges.length - 1];
   };
@@ -26,7 +29,7 @@ const BadgeProgress = ({ currentBadges, nextBadge, progress }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-xl p-6"
+      className="bg-white rounded-xl p-6"
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Next Badge</h3>
@@ -62,7 +65,7 @@ const BadgeProgress = ({ currentBadges, nextBadge, progress }) => {
       <div className="mt-6">
         <h4 className="text-sm font-medium text-gray-900 mb-2">Your Badges</h4>
         <div className="flex flex-wrap gap-2">
-          {currentBadges.map((badge) => (
+          {(currentBadges || []).map((badge) => (
             <motion.div
               key={badge.id}
               whileHover={{ scale: 1.1 }}
@@ -73,6 +76,10 @@ const BadgeProgress = ({ currentBadges, nextBadge, progress }) => {
             </motion.div>
           ))}
         </div>
+      </div>
+      
+      <div className="mt-4 text-right text-sm text-gray-500">
+        Current Streak: <span className="font-semibold text-green-600">{Math.floor(progress/10) || 0} days</span>
       </div>
     </motion.div>
   );

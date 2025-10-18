@@ -8,7 +8,7 @@ public class SchemaTest {
     public static void main(String[] args) {
         try {
             // Test database connection
-            Connection connection = DBConnection.getConnection();
+            Connection connection = DBConnection.createConnection();
             System.out.println("Connected to database successfully!");
             
             // Test users table

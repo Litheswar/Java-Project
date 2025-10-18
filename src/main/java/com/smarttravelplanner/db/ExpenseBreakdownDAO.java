@@ -1,13 +1,27 @@
 package com.smarttravelplanner.db;
 
 import com.smarttravelplanner.model.ExpenseBreakdown;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpenseBreakdownDAO extends BaseDAO {
+@Repository
+public class ExpenseBreakdownDAO {
+    
+    private final DataSource dataSource;
+    
+    @Autowired
+    public ExpenseBreakdownDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+    
+    private Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
     
     /**
      * Creates a new expense breakdown in the database

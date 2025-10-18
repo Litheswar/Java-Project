@@ -1,12 +1,27 @@
 package com.smarttravelplanner.db;
 
 import com.smarttravelplanner.model.Alert;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlertDAO extends BaseDAO {
+@Repository
+public class AlertDAO {
+    
+    private final DataSource dataSource;
+    
+    @Autowired
+    public AlertDAO(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+    
+    private Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
     
     /**
      * Creates a new alert in the database

@@ -1,7 +1,5 @@
 package com.smarttravelplanner.model;
 
-import java.util.ArrayList;
-
 /**
  * Plain Java test class for Plan without using JUnit
  */

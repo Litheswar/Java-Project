@@ -3,9 +3,11 @@ package com.smarttravelplanner.db;
 import com.smarttravelplanner.model.ExpenseBreakdown;
 
 import java.sql.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
+<<<<<<< HEAD
 public class ExpenseBreakdownDAO {
     
     private Connection getConnection() throws SQLException {
@@ -16,6 +18,9 @@ public class ExpenseBreakdownDAO {
         
         return DriverManager.getConnection(url, username, password);
     }
+=======
+public class ExpenseBreakdownDAO extends BaseDAO {
+>>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new expense breakdown in the database

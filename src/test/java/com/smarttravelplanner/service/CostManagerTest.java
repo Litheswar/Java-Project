@@ -107,18 +107,39 @@ public class CostManagerTest {
         } catch (BudgetExceededException e) {
             // This is expected
             System.out.println("BudgetExceededException correctly thrown: " + e.getMessage());
-            System.out.println("BudgetExceededException test passed.");
         }
+        System.out.println("BudgetExceededException test passed.");
     }
     
     // Custom assertion methods to replace JUnit assertions
+    private static void assertEqual(Object expected, Object actual, String message) {
+        if (expected == null && actual == null) return;
+        if (expected != null && expected.equals(actual)) return;
+        throw new AssertionError(message + ". Expected: " + expected + ", but was: " + actual);
+    }
+    
     private static void assertEqual(double expected, double actual, double delta, String message) {
-        if (Math.abs(expected - actual) <= delta) return;
+        if (Math.abs(expected - actual) < delta) return;
         throw new AssertionError(message + ". Expected: " + expected + ", but was: " + actual);
     }
     
     private static void assertEqual(int expected, int actual, String message) {
         if (expected == actual) return;
         throw new AssertionError(message + ". Expected: " + expected + ", but was: " + actual);
+    }
+    
+    private static void assertNotNull(Object actual, String message) {
+        if (actual != null) return;
+        throw new AssertionError(message + ". Expected not null, but was null");
+    }
+    
+    private static void assertTrue(boolean condition, String message) {
+        if (condition) return;
+        throw new AssertionError(message + ". Expected true, but was false");
+    }
+    
+    private static void assertFalse(boolean condition, String message) {
+        if (!condition) return;
+        throw new AssertionError(message + ". Expected false, but was true");
     }
 }

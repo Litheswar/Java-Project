@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
 import { 
   HomeIcon, 
   MapIcon, 
@@ -15,21 +14,10 @@ import {
 
 const Navbar = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleSignOut = () => {
-    signOut();
-    navigate('/');
-  };
-
-  const publicNavItems = [
-    { name: 'Home', path: '/', icon: HomeIcon }
-  ];
-
-  const privateNavItems = [
-    { name: 'Home', path: '/home', icon: HomeIcon },
+  const navItems = [
+    { name: 'Home', path: '/', icon: HomeIcon },
     { name: 'Planner', path: '/planner', icon: MapIcon },
     { name: 'Expenses', path: '/expenses', icon: CreditCardIcon },
     { name: 'Alerts', path: '/alerts', icon: BellIcon },
@@ -37,12 +25,8 @@ const Navbar = () => {
     { name: 'Settings', path: '/settings', icon: CogIcon },
   ];
 
-  const navItems = user ? privateNavItems : publicNavItems;
-
   const isActive = (path) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path === '/') return false;
-    return location.pathname.startsWith(path);
+    return location.pathname === path;
   };
 
   return (
@@ -50,7 +34,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to={user ? "/home" : "/"} className="flex-shrink-0 flex items-center">
+            <Link to="/" className="flex-shrink-0 flex items-center">
               <div className="bg-gradient-to-r from-primary to-secondary w-8 h-8 rounded-lg"></div>
               <span className="ml-2 text-xl font-bold gradient-text">Seamless-GO</span>
             </Link>
@@ -72,22 +56,6 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
-            
-            {user ? (
-              <button
-                onClick={handleSignOut}
-                className="px-4 py-2 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                Logout
-              </button>
-            ) : (
-              <Link
-                to="/login"
-                className="px-4 py-2 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                Sign In
-              </Link>
-            )}
           </div>
           
           {/* Mobile menu button */}
@@ -130,26 +98,6 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
-            
-            {user ? (
-              <button
-                onClick={() => {
-                  handleSignOut();
-                  setIsMenuOpen(false);
-                }}
-                className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-primary hover:bg-blue-50/30"
-              >
-                Logout
-              </button>
-            ) : (
-              <Link
-                to="/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-primary hover:bg-blue-50/30"
-              >
-                Sign In
-              </Link>
-            )}
           </div>
         </motion.div>
       )}

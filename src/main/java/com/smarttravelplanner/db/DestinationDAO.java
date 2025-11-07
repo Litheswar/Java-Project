@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+<<<<<<< HEAD
 public class DestinationDAO {
     
     private Connection getConnection() throws SQLException {
@@ -16,6 +17,9 @@ public class DestinationDAO {
         
         return DriverManager.getConnection(url, username, password);
     }
+=======
+public class DestinationDAO extends BaseDAO {
+>>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new destination in the database

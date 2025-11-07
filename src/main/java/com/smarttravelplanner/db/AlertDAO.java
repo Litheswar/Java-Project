@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+<<<<<<< HEAD
 public class AlertDAO {
     
     private Connection getConnection() throws SQLException {
@@ -16,6 +17,9 @@ public class AlertDAO {
         
         return DriverManager.getConnection(url, username, password);
     }
+=======
+public class AlertDAO extends BaseDAO {
+>>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new alert in the database

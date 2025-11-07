@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   MapPinIcon, 
@@ -17,27 +17,20 @@ import Button from '../components/Button';
 import Stepper from '../components/Stepper';
 import Map from '../components/Map';
 import TravelAdvisor from '../components/TravelAdvisor';
-import { destinationService } from '../services/destinationService';
-import { useAppContext } from '../context/AppContext';
+import {
+  mockDestinations,
+  mockMapData
+} from '../assets/mockData';
 
 const PlannerPage = () => {
-  const { user } = useAppContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [tripData, setTripData] = useState({
     destination: '',
     startDate: '',
     endDate: '',
     travelers: 1,
-    budget: '',
-    country: '',
-    state: ''
+    budget: ''
   });
-  
-  const [countries, setCountries] = useState([]);
-  const [states, setStates] = useState([]);
-  const [destinations, setDestinations] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   
   // Mock eco-friendly suggestions
   const ecoSuggestions = [
@@ -62,72 +55,6 @@ const PlannerPage = () => {
     { title: 'Budget' },
     { title: 'Review' }
   ];
-  
-  // Fetch countries when component mounts
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        setLoading(true);
-        const countriesData = await destinationService.getAllCountries();
-        setCountries(countriesData);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching countries:', err);
-        setError('Failed to load countries. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchCountries();
-  }, []);
-  
-  // Fetch states when country is selected
-  useEffect(() => {
-    const fetchStates = async () => {
-      if (tripData.country) {
-        try {
-          setLoading(true);
-          const statesData = await destinationService.getStatesByCountryId(tripData.country);
-          setStates(statesData);
-          setError(null);
-        } catch (err) {
-          console.error('Error fetching states:', err);
-          setError('Failed to load states. Please try again later.');
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setStates([]);
-        setDestinations([]);
-      }
-    };
-    
-    fetchStates();
-  }, [tripData.country]);
-  
-  // Fetch destinations when state is selected
-  useEffect(() => {
-    const fetchDestinations = async () => {
-      if (tripData.state) {
-        try {
-          setLoading(true);
-          const destinationsData = await destinationService.getDestinationsByStateId(tripData.state);
-          setDestinations(destinationsData);
-          setError(null);
-        } catch (err) {
-          console.error('Error fetching destinations:', err);
-          setError('Failed to load destinations. Please try again later.');
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setDestinations([]);
-      }
-    };
-    
-    fetchDestinations();
-  }, [tripData.state]);
   
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -157,107 +84,40 @@ const PlannerPage = () => {
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Choose your destination</h3>
               <div className="space-y-4">
-                {/* Country Selection */}
-                <div>
-                  <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-                    Country
-                  </label>
-                  <select
-                    id="country"
-                    name="country"
-                    value={tripData.country}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full pl-3 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-primary focus:border-primary"
+                {mockDestinations.map((destination) => (
+                  <Card 
+                    key={destination.id}
+                    hoverEffect={true}
+                    className={`cursor-pointer ${
+                      tripData.destination === destination.id ? 'ring-2 ring-primary' : ''
+                    }`}
+                    onClick={() => setTripData(prev => ({ ...prev, destination: destination.id }))}
                   >
-                    <option value="">Select a country</option>
-                    {countries.map(country => (
-                      <option key={country.id} value={country.id}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                {/* State Selection */}
-                {tripData.country && (
-                  <div>
-                    <label htmlFor="state" className="block text-sm font-medium text-gray-700">
-                      State/Region
-                    </label>
-                    <select
-                      id="state"
-                      name="state"
-                      value={tripData.state}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full pl-3 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-primary focus:border-primary"
-                    >
-                      <option value="">Select a state/region</option>
-                      {states.map(state => (
-                        <option key={state.id} value={state.id}>
-                          {state.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                
-                {/* Destination Selection */}
-                {tripData.state && destinations.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Destination
-                    </label>
-                    <div className="space-y-3 mt-2">
-                      {destinations.map((destination) => (
-                        <Card 
-                          key={destination.id}
-                          hoverEffect={true}
-                          className={`cursor-pointer ${
-                            tripData.destination === destination.id ? 'ring-2 ring-primary' : ''
-                          }`}
-                          onClick={() => setTripData(prev => ({ ...prev, destination: destination.id }))}
-                        >
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                              <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
-                            </div>
-                            <div className="ml-4">
-                              <h4 className="text-sm font-medium text-gray-900">{destination.name}</h4>
-                              <p className="text-sm text-gray-500">{destination.description}</p>
-                              <div className="mt-1 flex items-center">
-                                <SparklesIcon className="h-4 w-4 text-green-500 mr-1" />
-                                <span className="text-xs text-green-600 font-medium">
-                                  {destination.sustainabilityScore}% sustainable
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+                      </div>
+                      <div className="ml-4">
+                        <h4 className="text-sm font-medium text-gray-900">{destination.name}</h4>
+                        <p className="text-sm text-gray-500">{destination.country}</p>
+                        <div className="mt-1 flex items-center">
+                          <SparklesIcon className="h-4 w-4 text-green-500 mr-1" />
+                          <span className="text-xs text-green-600 font-medium">
+                            {destination.sustainabilityScore}% sustainable
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                {loading && (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                )}
-                
-                {error && (
-                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <strong className="font-bold">Error! </strong>
-                    <span className="block sm:inline">{error}</span>
-                  </div>
-                )}
+                  </Card>
+                ))}
               </div>
             </div>
             
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Map Preview</h3>
               <Map 
-                center={[0, 0]}
-                markers={[]}
+                center={mockMapData.center}
+                markers={mockMapData.markers}
                 className="h-96"
               />
             </div>
@@ -575,7 +435,7 @@ const PlannerPage = () => {
                   <div>
                     <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Destination</h4>
                     <p className="mt-1 text-lg font-medium text-gray-900">
-                      {destinations.find(d => d.id === tripData.destination)?.name || 'Not selected'}
+                      {mockDestinations.find(d => d.id === tripData.destination)?.name || 'Not selected'}
                     </p>
                   </div>
                   
@@ -660,7 +520,7 @@ const PlannerPage = () => {
                   </div>
                   
                   <div className="mt-6">
-                    <Button variant="primary" className="w-full" onClick={handleCreateTrip}>
+                    <Button variant="primary" className="w-full">
                       Create Trip Plan
                     </Button>
                     <Button variant="ghost" className="w-full mt-3">
@@ -675,44 +535,6 @@ const PlannerPage = () => {
       
       default:
         return null;
-    }
-  };
-  
-  const handleCreateTrip = async () => {
-    try {
-      // Create trip object with collected data
-      const tripToCreate = {
-        name: `${destinations.find(d => d.id === tripData.destination)?.name || 'My Trip'} Trip`,
-        destination: destinations.find(d => d.id === tripData.destination)?.name || '',
-        startDate: tripData.startDate,
-        endDate: tripData.endDate,
-        budget: parseFloat(tripData.budget) || 0,
-        spent: 0,
-        co2Saved: 0,
-        status: 'planning',
-        userId: user.id
-      };
-      
-      // In a real implementation, you would call the trip service to create the trip
-      // const createdTrip = await tripService.createTrip(tripToCreate);
-      
-      // For now, we'll just show an alert
-      alert('Trip created successfully! In a real implementation, this would save to the database.');
-      
-      // Reset form
-      setTripData({
-        destination: '',
-        startDate: '',
-        endDate: '',
-        travelers: 1,
-        budget: '',
-        country: '',
-        state: ''
-      });
-      setCurrentStep(0);
-    } catch (error) {
-      console.error('Error creating trip:', error);
-      alert('Failed to create trip. Please try again.');
     }
   };
   

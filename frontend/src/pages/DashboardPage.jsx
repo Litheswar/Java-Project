@@ -13,48 +13,28 @@ import Card from '../components/Card';
 import Chart from '../components/Chart';
 import Button from '../components/Button';
 import ProductivityDashboard from '../components/ProductivityDashboard';
-import { useAppContext } from '../context/AppContext';
-import { userService } from '../services/userService';
-import { tripService } from '../services/tripService';
-import { alertService } from '../services/alertService';
+import {
+  mockUser,
+  mockTrips,
+  mockChartData,
+  mockAlerts
+} from '../assets/mockData';
 
 const DashboardPage = () => {
-  const { user } = useAppContext();
   const [upcomingTrips, setUpcomingTrips] = useState([]);
   const [recentAlerts, setRecentAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch user data (in a real app, this might be from context or props)
-        // const userData = await userService.getUserById(1); // Assuming user ID 1 for now
-        
-        // Fetch trips for the user
-        const tripsData = await tripService.getTripsByUserId(user.id);
-        const upcoming = tripsData.filter(trip => trip.status === 'upcoming' || trip.status === 'planning');
-        setUpcomingTrips(upcoming);
-        
-        // Fetch alerts for the user
-        const alertsData = await alertService.getAlertsByUserId(user.id);
-        const unreadAlerts = alertsData.filter(alert => !alert.read);
-        setRecentAlerts(unreadAlerts);
-        
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-        setError('Failed to load dashboard data. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Filter upcoming trips
+    const upcoming = mockTrips.filter(trip => trip.status === 'upcoming' || trip.status === 'planning');
+    setUpcomingTrips(upcoming);
     
-    fetchData();
-  }, [user.id]);
+    // Get recent alerts (unread)
+    const unreadAlerts = mockAlerts.filter(alert => !alert.read);
+    setRecentAlerts(unreadAlerts);
+  }, []);
   
-  // Mock monthly data for productivity dashboard (in a real app, this would come from the API)
+  // Mock monthly data for productivity dashboard
   const monthlyData = [
     { month: 'Jan', trips: 2, co2Saved: 120 },
     { month: 'Feb', trips: 1, co2Saved: 80 },
@@ -67,21 +47,21 @@ const DashboardPage = () => {
   const statCards = [
     {
       title: "Eco Score",
-      value: user.ecoScore,
+      value: mockUser.ecoScore,
       icon: <SparklesIcon className="h-6 w-6 text-green-500" />,
       change: "+5 from last month",
       color: "from-green-400 to-green-600"
     },
     {
       title: "Travel Points",
-      value: user.travelPoints,
+      value: mockUser.travelPoints,
       icon: <TrophyIcon className="h-6 w-6 text-yellow-500" />,
       change: "+150 this month",
       color: "from-yellow-400 to-yellow-600"
     },
     {
       title: "Current Streak",
-      value: user.streak,
+      value: mockUser.streak,
       icon: <FireIcon className="h-6 w-6 text-red-500" />,
       change: "Keep it up!",
       color: "from-red-400 to-red-600"
@@ -95,25 +75,6 @@ const DashboardPage = () => {
     }
   ];
   
-  if (loading) {
-    return (
-      <div className="py-8 flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div className="py-8 flex justify-center items-center h-64">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Error! </strong>
-          <span className="block sm:inline">{error}</span>
-        </div>
-      </div>
-    );
-  }
-  
   return (
     <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -126,7 +87,7 @@ const DashboardPage = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
               <p className="mt-1 text-sm text-gray-600">
-                Welcome back, {user.name}! Here's what's happening with your trips.
+                Welcome back, {mockUser.name}! Here's what's happening with your trips.
               </p>
             </div>
             <div className="mt-4 flex md:mt-0 md:ml-4">
@@ -161,11 +122,11 @@ const DashboardPage = () => {
           
           {/* Charts and Upcoming Trips */}
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Spending Chart - in a real app, this would come from the expense service */}
+            {/* Spending Chart */}
             <div className="lg:col-span-2">
               <Chart 
                 title="Spending by Category"
-                data={[]} // This would be populated with real data from expenseService
+                data={mockChartData.expensesByCategory}
                 type="pie"
                 dataKey="name"
                 height={350}
@@ -220,19 +181,19 @@ const DashboardPage = () => {
           <div className="mt-8">
             <ProductivityDashboard 
               monthlyData={monthlyData}
-              streak={user.streak}
-              ecoScore={user.ecoScore}
-              travelPoints={user.travelPoints}
+              streak={mockUser.streak}
+              ecoScore={mockUser.ecoScore}
+              travelPoints={mockUser.travelPoints}
             />
           </div>
           
           {/* Eco Impact and Alerts */}
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Eco Impact Chart - in a real app, this would come from the API */}
+            {/* Eco Impact Chart */}
             <div className="lg:col-span-2">
               <Chart 
                 title="Eco Impact Over Time"
-                data={[]} // This would be populated with real data
+                data={mockChartData.ecoImpact}
                 type="bar"
                 dataKey="month"
                 height={300}

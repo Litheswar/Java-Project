@@ -3,6 +3,7 @@ package com.smarttravelplanner.service;
 import com.smarttravelplanner.model.CityPlan;
 import com.smarttravelplanner.model.Destination;
 import com.smarttravelplanner.model.TourPlan;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +58,7 @@ public class PlannerServiceTest {
     public static void testPlannerServiceCreation() {
         System.out.println("Testing PlannerService creation...");
         PlannerService plannerService = new PlannerService();
+        
         assertNotNull(plannerService, "PlannerService should not be null");
         System.out.println("PlannerService creation test passed.");
     }
@@ -129,20 +131,25 @@ public class PlannerServiceTest {
     }
     
     // Custom assertion methods to replace JUnit assertions
-    private static void assertNotNull(Object actual, String message) {
-        if (actual != null) return;
-        throw new AssertionError(message + ". Expected not null, but was null");
-    }
-    
     private static void assertEqual(Object expected, Object actual, String message) {
         if (expected == null && actual == null) return;
         if (expected != null && expected.equals(actual)) return;
         throw new AssertionError(message + ". Expected: " + expected + ", but was: " + actual);
     }
     
-    private static void assertEqual(int expected, int actual, String message) {
-        if (expected == actual) return;
+    private static void assertEqual(double expected, double actual, String message) {
+        if (Math.abs(expected - actual) < 0.01) return; // Using 0.01 as tolerance
         throw new AssertionError(message + ". Expected: " + expected + ", but was: " + actual);
+    }
+    
+    private static void assertNotNull(Object actual, String message) {
+        if (actual != null) return;
+        throw new AssertionError(message + ". Expected not null, but was null");
+    }
+    
+    private static void assertNull(Object actual, String message) {
+        if (actual == null) return;
+        throw new AssertionError(message + ". Expected null, but was: " + actual);
     }
     
     private static void assertTrue(boolean condition, String message) {

@@ -1,5 +1,6 @@
 package com.smarttravelplanner;
 
+import com.smarttravelplanner.db.DestinationDAO;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -10,22 +11,18 @@ public class TestFixes {
         
         try {
             // Test the new getStatesWithBaseBudget method
+<<<<<<< HEAD
             com.smarttravelplanner.db.DestinationDAO destinationDAO = new com.smarttravelplanner.db.DestinationDAO();
+=======
+            DestinationDAO destinationDAO = new DestinationDAO();
+>>>>>>> parent of a75ffb45 (Connected Backend to Database)
             List<String> states = destinationDAO.getStatesWithBaseBudget("India");
             System.out.println("✓ getStatesWithBaseBudget method exists and compiles");
-            // Using the states variable to avoid unused variable warning
-            if (states != null) {
-                System.out.println("  Found " + states.size() + " states");
-            }
             
             // Test the fixed type mismatch
             List<com.smarttravelplanner.model.Destination> affordableDests = 
                 destinationDAO.getAffordableDestinations(5000.0);
             System.out.println("✓ getAffordableDestinations type mismatch fixed");
-            // Using the affordableDests variable to avoid unused variable warning
-            if (affordableDests != null) {
-                System.out.println("  Found " + affordableDests.size() + " affordable destinations");
-            }
             
             System.out.println("All fixes verified successfully!");
             

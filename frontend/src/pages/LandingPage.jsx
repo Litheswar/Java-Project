@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
 import { 
   ArrowRightIcon, 
   GlobeAltIcon, 
@@ -16,18 +15,11 @@ import WorldMap from '../components/WorldMap';
 import DiscoveryQuiz from '../components/DiscoveryQuiz';
 
 const LandingPage = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
     setIsVisible(true);
-    
-    // If user is already logged in, redirect to home page
-    if (user) {
-      navigate('/home');
-    }
-  }, [user, navigate]);
+  }, []);
   
   const features = [
     {
@@ -124,11 +116,6 @@ const LandingPage = () => {
   const handleRecommendation = (destination) => {
     console.log('Recommended destination:', destination);
   };
-  
-  // If user is logged in, don't render the landing page content
-  if (user) {
-    return null;
-  }
   
   return (
     <div className="min-h-screen">

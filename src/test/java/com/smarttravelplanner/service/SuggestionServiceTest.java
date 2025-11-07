@@ -47,6 +47,7 @@ public class SuggestionServiceTest {
         System.out.println("Testing SuggestionService creation...");
         LocationService locationService = new LocationService();
         SuggestionService suggestionService = new SuggestionService(locationService);
+        
         assertNotNull(suggestionService, "SuggestionService should not be null");
         System.out.println("SuggestionService creation test passed.");
     }
@@ -55,6 +56,7 @@ public class SuggestionServiceTest {
         System.out.println("Testing suggestDestinationsByBudget method...");
         LocationService locationService = new LocationService();
         SuggestionService suggestionService = new SuggestionService(locationService);
+        
         // Test with a budget that should match some destinations
         List<Destination> suggestions = suggestionService.suggestDestinationsByBudget(5000.00);
         
@@ -68,6 +70,7 @@ public class SuggestionServiceTest {
         System.out.println("Testing suggestCostAdjustments method...");
         LocationService locationService = new LocationService();
         SuggestionService suggestionService = new SuggestionService(locationService);
+        
         Destination destination = new Destination(1, "France", "Hauts-de-France", "Lille", 5000.00);
         
         // Test when budget is sufficient
@@ -86,6 +89,7 @@ public class SuggestionServiceTest {
         System.out.println("Testing suggestDestinationsByCountry method...");
         LocationService locationService = new LocationService();
         SuggestionService suggestionService = new SuggestionService(locationService);
+        
         List<Destination> franceDestinations = suggestionService.suggestDestinationsByCountry("France");
         
         assertNotNull(franceDestinations, "France destinations list should not be null");
@@ -95,14 +99,20 @@ public class SuggestionServiceTest {
     }
     
     // Custom assertion methods to replace JUnit assertions
+    private static void assertEqual(Object expected, Object actual, String message) {
+        if (expected == null && actual == null) return;
+        if (expected != null && expected.equals(actual)) return;
+        throw new AssertionError(message + ". Expected: " + expected + ", but was: " + actual);
+    }
+    
     private static void assertNotNull(Object actual, String message) {
         if (actual != null) return;
         throw new AssertionError(message + ". Expected not null, but was null");
     }
     
-    private static void assertFalse(boolean condition, String message) {
-        if (!condition) return;
-        throw new AssertionError(message + ". Expected false, but was true");
+    private static void assertNull(Object actual, String message) {
+        if (actual == null) return;
+        throw new AssertionError(message + ". Expected null, but was: " + actual);
     }
     
     private static void assertTrue(boolean condition, String message) {
@@ -110,9 +120,8 @@ public class SuggestionServiceTest {
         throw new AssertionError(message + ". Expected true, but was false");
     }
     
-    private static void assertEqual(String expected, String actual, String message) {
-        if (expected == null && actual == null) return;
-        if (expected != null && expected.equals(actual)) return;
-        throw new AssertionError(message + ". Expected: " + expected + ", but was: " + actual);
+    private static void assertFalse(boolean condition, String message) {
+        if (!condition) return;
+        throw new AssertionError(message + ". Expected false, but was true");
     }
 }

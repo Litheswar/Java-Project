@@ -10,6 +10,7 @@ import com.smarttravelplanner.service.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.sql.SQLException;
 
 public class Main {
     private static Scanner scanner = new Scanner(System.in);
@@ -41,7 +42,7 @@ public class Main {
                 TripConfiguration tripConfig = configureTrip();
 
                 // Step 3: State & Destination Preview (using database)
-                // previewDestinationsFromDatabase(tripConfig.getCountry()); // This method needs to be updated to use Spring
+                previewDestinationsFromDatabase(tripConfig.getCountry());
 
                 // Step 4: Travel, Stay & Meal Selection
                 String travelMode = selectTravelMode();
@@ -304,6 +305,82 @@ public class Main {
         return countries;
     }
 
+    private static void previewDestinationsFromDatabase(String country) {
+        System.out.println("\nStates in " + country + " (from database):");
+
+        try {
+            DestinationDAO destinationDAO = new DestinationDAO();
+            List<String> stateBudgets = destinationDAO.getStatesWithBaseBudget(country);
+            
+            if (stateBudgets.isEmpty()) {
+                System.out.println("No states found for " + country + " in the database.");
+                return;
+            }
+
+            System.out.println("Would you like to preview all states with their base budget? (Y/N): ");
+            String previewChoice = scanner.nextLine();
+
+            if ("Y".equalsIgnoreCase(previewChoice) || "YES".equalsIgnoreCase(previewChoice)) {
+                for (int i = 0; i < stateBudgets.size(); i++) {
+                    System.out.println((i + 1) + ". " + stateBudgets.get(i));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Database error while fetching state budgets: " + e.getMessage());
+            System.out.println("Using fallback data...");
+            previewDestinations(country); // Fallback to original method
+        }
+
+        System.out.println("Press Enter to continue...");
+        scanner.nextLine();
+    }
+
+    private static void previewDestinations(String country) {
+        // Sample state data for demonstration
+        List<State> states = new ArrayList<>();
+        switch (country) {
+            case "France":
+                states.add(new State("Paris", "City of Light", 60000));
+                states.add(new State("Provence", "Lavender fields", 55000));
+                states.add(new State("French Riviera", "Coastal paradise", 70000));
+                states.add(new State("Loire Valley", "Castle region", 50000));
+                break;
+            case "Japan":
+                states.add(new State("Tokyo", "Modern metropolis", 65000));
+                states.add(new State("Kyoto", "Traditional temples", 48000));
+                states.add(new State("Osaka", "Food capital", 55000));
+                states.add(new State("Okinawa", "Tropical islands", 40000));
+                break;
+            case "India":
+                states.add(new State("Goa", "Beach destination", 35000));
+                states.add(new State("Kerala", "Backwaters", 30000));
+                states.add(new State("Rajasthan", "Palaces and forts", 25000));
+                states.add(new State("Himachal Pradesh", "Hill stations", 20000));
+                break;
+            default:
+                states.add(new State("State 1", "Description 1", 50000));
+                states.add(new State("State 2", "Description 2", 45000));
+                states.add(new State("State 3", "Description 3", 40000));
+                states.add(new State("State 4", "Description 4", 35000));
+                break;
+        }
+
+        System.out.println("Would you like to preview all states with their estimated cost? (Y/N): ");
+        String previewChoice = scanner.nextLine();
+
+        if ("Y".equalsIgnoreCase(previewChoice) || "YES".equalsIgnoreCase(previewChoice)) {
+            for (int i = 0; i < states.size(); i++) {
+                State state = states.get(i);
+                System.out.println((i + 1) + ". " + state.getName() +
+                        " (Avg Cost: ₹" + String.format("%.0f", state.getAverageCost()) + ")");
+                System.out.println("   " + state.getDescription());
+            }
+        }
+
+        System.out.println("Press Enter to continue...");
+        scanner.nextLine();
+    }
+
     private static String selectTravelMode() {
         System.out.println("\n=== Travel Mode Selection ===");
         System.out.println("1. Road");
@@ -449,20 +526,20 @@ public class Main {
             }
 
             // Suggest affordable destinations
-            // try {
-            //     // DestinationDAO destinationDAO = new DestinationDAO(); // This needs to be updated to use Spring
-            //     // List<Destination> affordableDestinations = destinationDAO.getAffordableDestinations(traveler.getBudget());
-            //     // if (!affordableDestinations.isEmpty()) {
-            //     //     System.out.println("\n💰 Affordable destinations within your budget:");
-            //     //     for (int i = 0; i < Math.min(5, affordableDestinations.size()); i++) {
-            //     //         Destination dest = affordableDestinations.get(i);
-            //     //         System.out.println("  " + dest.getCountry() + " - " + dest.getState() + " - " + dest.getCity() + 
-            //     //                          " (Cost: ₹" + String.format("%.0f", dest.getBaseCost()) + ")");
-            //     //     }
-            //     // }
-            // // } catch (SQLException e) {
-            // //     System.err.println("Database error while fetching affordable destinations: " + e.getMessage());
-            // // }
+            try {
+                DestinationDAO destinationDAO = new DestinationDAO();
+                List<Destination> affordableDestinations = destinationDAO.getAffordableDestinations(traveler.getBudget());
+                if (!affordableDestinations.isEmpty()) {
+                    System.out.println("\n💰 Affordable destinations within your budget:");
+                    for (int i = 0; i < Math.min(5, affordableDestinations.size()); i++) {
+                        Destination dest = affordableDestinations.get(i);
+                        System.out.println("  " + dest.getCountry() + " - " + dest.getState() + " - " + dest.getCity() + 
+                                         " (Cost: ₹" + String.format("%.0f", dest.getBaseCost()) + ")");
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("Database error while fetching affordable destinations: " + e.getMessage());
+            }
 
             System.out.println("\nOptions:");
             System.out.println("1. Increase your budget");

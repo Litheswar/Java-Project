@@ -1,10 +1,11 @@
 package com.smarttravelplanner.model;
 
 import java.sql.Timestamp;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Country {
-    private UUID id;
+    private int id;
     private String name;
     private Timestamp createdAt;
     private Timestamp updatedAt;
@@ -16,7 +17,7 @@ public class Country {
         this.name = name;
     }
     
-    public Country(UUID id, String name, Timestamp createdAt, Timestamp updatedAt) {
+    public Country(int id, String name, Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.name = name;
         this.createdAt = createdAt;
@@ -24,11 +25,11 @@ public class Country {
     }
     
     // Getters and Setters
-    public UUID getId() {
+    public int getId() {
         return id;
     }
     
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
     

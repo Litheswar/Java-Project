@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+<<<<<<< HEAD
 public class TripHistoryDAO {
     
     private Connection getConnection() throws SQLException {
@@ -17,6 +18,9 @@ public class TripHistoryDAO {
         
         return DriverManager.getConnection(url, username, password);
     }
+=======
+public class TripHistoryDAO extends BaseDAO {
+>>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new trip history entry in the database

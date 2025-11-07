@@ -1,9 +1,7 @@
 package com.smarttravelplanner.db;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
@@ -11,15 +9,17 @@ import java.sql.SQLException;
  */
 public abstract class BaseDAO {
     
-    @Autowired
-    protected DataSource dataSource;
-    
     /**
      * Gets a database connection
      * @return Connection object
      * @throws SQLException if connection fails
      */
     protected Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        // Database connection parameters
+        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
+        String username = "postgres";
+        String password = "Lithu19!"; // Updated to match application.properties
+        
+        return DriverManager.getConnection(url, username, password);
     }
 }

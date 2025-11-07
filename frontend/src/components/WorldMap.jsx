@@ -25,18 +25,30 @@ const WorldMap = ({ destinations, onDestinationSelect }) => {
   // Custom marker icon based on sustainability
   const createCustomIcon = (sustainabilityScore) => {
     const color = getMarkerColor(sustainabilityScore);
+    // Create inline styles instead of Tailwind classes
+    const colorClasses = {
+      green: '#10B981',
+      yellow: '#FBBF24',
+      red: '#EF4444'
+    };
+    
+    const markerColor = colorClasses[color] || colorClasses.green;
+    
     return L.divIcon({
       className: 'custom-icon',
       html: `
-        <div class="relative">
-          <div class="w-6 h-6 rounded-full bg-${color}-500 border-2 border-white shadow-lg flex items-center justify-center">
-            <div class="w-2 h-2 rounded-full bg-white"></div>
+        <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${markerColor}; 
+                      border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+                      display: flex; align-items: center; justify-content: center;">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background-color: white;"></div>
           </div>
-          <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-${color}-500"></div>
+          <div style="width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; 
+                      border-top: 8px solid ${markerColor}; margin-top: -1px;"></div>
         </div>
       `,
-      iconSize: [24, 24],
-      iconAnchor: [12, 24],
+      iconSize: [24, 32],
+      iconAnchor: [12, 32],
     });
   };
 
@@ -45,7 +57,8 @@ const WorldMap = ({ destinations, onDestinationSelect }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="glass-card rounded-xl overflow-hidden h-96"
+      className="glass-card rounded-xl overflow-hidden"
+      style={{ height: '400px' }}
     >
       <MapContainer 
         center={[20, 0]} 
@@ -72,14 +85,16 @@ const WorldMap = ({ destinations, onDestinationSelect }) => {
             }}
           >
             <Popup>
-              <div className="font-semibold">{destination.name}</div>
-              <div className="text-sm text-gray-600">{destination.country}</div>
-              <div className="mt-1 flex items-center">
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  🌱 {destination.sustainabilityScore}% sustainable
-                </span>
+              <div style={{ minWidth: '200px' }}>
+                <div className="font-semibold">{destination.name}</div>
+                <div className="text-sm text-gray-600">{destination.country}</div>
+                <div className="mt-1 flex items-center">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    🌱 {destination.sustainabilityScore}% sustainable
+                  </span>
+                </div>
+                <div className="mt-2 text-sm">{destination.description}</div>
               </div>
-              <div className="mt-2 text-sm">{destination.description}</div>
             </Popup>
           </Marker>
         ))}

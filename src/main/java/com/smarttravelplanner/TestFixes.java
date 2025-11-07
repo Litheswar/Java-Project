@@ -10,7 +10,7 @@ public class TestFixes {
         
         try {
             // Test the new getStatesWithBaseBudget method
-            com.smarttravelplanner.db.DestinationDAO destinationDAO = new com.smarttravelplanner.db.DestinationDAO(null);
+            com.smarttravelplanner.db.DestinationDAO destinationDAO = new com.smarttravelplanner.db.DestinationDAO();
             List<String> states = destinationDAO.getStatesWithBaseBudget("India");
             System.out.println("✓ getStatesWithBaseBudget method exists and compiles");
             // Using the states variable to avoid unused variable warning

@@ -1,26 +1,20 @@
 package com.smarttravelplanner.db;
 
 import com.smarttravelplanner.model.Destination;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
 public class DestinationDAO {
     
-    private final DataSource dataSource;
-    
-    @Autowired
-    public DestinationDAO(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-    
     private Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        // Database connection parameters
+        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
+        String username = "postgres";
+        String password = "Lithu19!"; // Updated to match application.properties
+        
+        return DriverManager.getConnection(url, username, password);
     }
     
     /**
@@ -208,65 +202,18 @@ public class DestinationDAO {
                         rs.getString("name"),
                         rs.getDouble("base_cost")
                     );
+                    // Set additional properties
+                    if (rs.getObject("sustainability_score") != null) {
+                        dest.setSustainabilityScore(rs.getInt("sustainability_score"));
+                    }
+                    if (rs.getObject("estimated_co2_footprint") != null) {
+                        dest.setEstimatedCo2Footprint(rs.getDouble("estimated_co2_footprint"));
+                    }
                     destinations.add(dest);
                 }
             }
         }
         return destinations;
-    }
-    
-    /**
-     * Updates a destination in the database
-     * @param destination The destination to update
-     * @return true if the update was successful, false otherwise
-     * @throws SQLException if a database error occurs
-     */
-    public boolean updateDestination(Destination destination) throws SQLException {
-        String sql = "UPDATE destinations SET state_id = ?, name = ?, base_cost = ?, sustainability_score = ?, estimated_co2_footprint = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, destination.getStateId());
-            stmt.setString(2, destination.getName());
-            stmt.setDouble(3, destination.getBaseCost());
-            
-            // Handle nullable fields
-            if (destination.getSustainabilityScore() != null) {
-                stmt.setInt(4, destination.getSustainabilityScore());
-            } else {
-                stmt.setNull(4, Types.INTEGER);
-            }
-            
-            if (destination.getEstimatedCo2Footprint() != null) {
-                stmt.setDouble(5, destination.getEstimatedCo2Footprint());
-            } else {
-                stmt.setNull(5, Types.DOUBLE);
-            }
-            
-            stmt.setInt(6, destination.getId());
-            
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-        }
-    }
-    
-    /**
-     * Deletes a destination from the database
-     * @param id The ID of the destination to delete
-     * @return true if the deletion was successful, false otherwise
-     * @throws SQLException if a database error occurs
-     */
-    public boolean deleteDestination(int id) throws SQLException {
-        String sql = "DELETE FROM destinations WHERE id = ?";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, id);
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
-        }
     }
     
     /**
@@ -276,18 +223,24 @@ public class DestinationDAO {
      * @throws SQLException if a database error occurs
      */
     private Destination mapResultSetToDestination(ResultSet rs) throws SQLException {
-        Integer sustainabilityScore = rs.getObject("sustainability_score", Integer.class);
-        Double estimatedCo2Footprint = rs.getObject("estimated_co2_footprint", Double.class);
+        Destination destination = new Destination();
+        destination.setId(rs.getInt("id"));
+        destination.setStateId(rs.getInt("state_id"));
+        destination.setName(rs.getString("name"));
+        destination.setBaseCost(rs.getDouble("base_cost"));
         
-        return new Destination(
-            rs.getInt("id"),
-            rs.getInt("state_id"),
-            rs.getString("name"),
-            rs.getDouble("base_cost"),
-            sustainabilityScore,
-            estimatedCo2Footprint,
-            rs.getTimestamp("created_at"),
-            rs.getTimestamp("updated_at")
-        );
+        // Handle nullable fields
+        if (rs.getObject("sustainability_score") != null) {
+            destination.setSustainabilityScore(rs.getInt("sustainability_score"));
+        }
+        
+        if (rs.getObject("estimated_co2_footprint") != null) {
+            destination.setEstimatedCo2Footprint(rs.getDouble("estimated_co2_footprint"));
+        }
+        
+        destination.setCreatedAt(rs.getTimestamp("created_at"));
+        destination.setUpdatedAt(rs.getTimestamp("updated_at"));
+        
+        return destination;
     }
 }

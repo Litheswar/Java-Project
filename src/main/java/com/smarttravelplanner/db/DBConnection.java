@@ -1,31 +1,10 @@
 package com.smarttravelplanner.db;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-@Component
 public class DBConnection {
-    
-    private final DataSource dataSource;
-    
-    @Autowired
-    public DBConnection(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-    
-    /**
-     * Gets a connection to the PostgreSQL database
-     * @return Connection object
-     * @throws SQLException if connection fails
-     */
-    public Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
-    }
     
     /**
      * Creates a direct connection to the PostgreSQL database for initialization purposes

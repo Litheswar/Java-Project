@@ -1,2 +1,3 @@
 Traveler: Lithesh | Country: Japan | Destination: Lille | Budget: ₹250000 | Cost: ₹6404 | Date: 2025-10-15T20:54:08.000990
 Traveler: lithu | Country: Singapore | Destination: Lille | Budget: ₹7777777 | Cost: ₹8696 | Date: 2025-10-16T00:09:14.781421
+Traveler: lithesh | Country: France | Destination: Lille | Budget: ₹555555 | Cost: ₹15064 | Date: 2025-11-07T14:11:02.665563300

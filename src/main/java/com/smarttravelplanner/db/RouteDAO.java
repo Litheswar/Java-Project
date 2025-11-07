@@ -1,26 +1,20 @@
 package com.smarttravelplanner.db;
 
 import com.smarttravelplanner.model.Route;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
 public class RouteDAO {
     
-    private final DataSource dataSource;
-    
-    @Autowired
-    public RouteDAO(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-    
     private Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
+        // Database connection parameters
+        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
+        String username = "postgres";
+        String password = "Lithu19!"; // Updated to match application.properties
+        
+        return DriverManager.getConnection(url, username, password);
     }
     
     /**

@@ -18,7 +18,7 @@ const Map = ({
   className = '' 
 }) => {
   return (
-    <div className={`glass-card rounded-xl overflow-hidden ${className}`}>
+    <div className={`glass-card rounded-xl overflow-hidden ${className}`} style={{ height: '400px' }}>
       <MapContainer 
         center={center} 
         zoom={zoom} 

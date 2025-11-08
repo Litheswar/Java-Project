@@ -7,20 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-<<<<<<< HEAD
-public class TripHistoryDAO {
-    
-    private Connection getConnection() throws SQLException {
-        // Database connection parameters
-        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
-        String username = "postgres";
-        String password = "Lithu19!"; // Updated to match application.properties
-        
-        return DriverManager.getConnection(url, username, password);
-    }
-=======
 public class TripHistoryDAO extends BaseDAO {
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new trip history entry in the database
@@ -95,30 +82,6 @@ public class TripHistoryDAO extends BaseDAO {
     }
     
     /**
-     * Retrieves all trip history entries for a specific trip
-     * @param tripId The ID of the trip
-     * @return A list of trip history entries for the trip
-     * @throws SQLException if a database error occurs
-     */
-    public List<TripHistory> getTripHistoryByTripId(int tripId) throws SQLException {
-        List<TripHistory> tripHistories = new ArrayList<>();
-        String sql = "SELECT * FROM trip_history WHERE trip_id = ? ORDER BY timestamp DESC";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, tripId);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    tripHistories.add(mapResultSetToTripHistory(rs));
-                }
-            }
-        }
-        return tripHistories;
-    }
-    
-    /**
      * Retrieves all trip history entries from the database
      * @return A list of all trip history entries
      * @throws SQLException if a database error occurs
@@ -145,15 +108,15 @@ public class TripHistoryDAO extends BaseDAO {
      * @throws SQLException if a database error occurs
      */
     public boolean updateTripHistory(TripHistory tripHistory) throws SQLException {
-        String sql = "UPDATE trip_history SET user_id = ?, trip_id = ?, timestamp = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE trip_history SET user_id = ?, trip_id = ?, status = ?, timestamp = ? WHERE id = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setObject(1, tripHistory.getUserId());
             stmt.setInt(2, tripHistory.getTripId());
-            stmt.setTimestamp(3, tripHistory.getTimestamp());
-            stmt.setString(4, tripHistory.getStatus());
+            stmt.setString(3, tripHistory.getStatus());
+            stmt.setTimestamp(4, tripHistory.getTimestamp());
             stmt.setInt(5, tripHistory.getId());
             
             int rowsAffected = stmt.executeUpdate();

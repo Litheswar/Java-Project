@@ -6,20 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-<<<<<<< HEAD
-public class StateDAO {
-    
-    private Connection getConnection() throws SQLException {
-        // Database connection parameters
-        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
-        String username = "postgres";
-        String password = "Lithu19!"; // Updated to match application.properties
-        
-        return DriverManager.getConnection(url, username, password);
-    }
-=======
 public class StateDAO extends BaseDAO {
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new state in the database

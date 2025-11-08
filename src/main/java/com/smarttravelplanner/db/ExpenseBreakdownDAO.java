@@ -3,24 +3,10 @@ package com.smarttravelplanner.db;
 import com.smarttravelplanner.model.ExpenseBreakdown;
 
 import java.sql.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
-<<<<<<< HEAD
-public class ExpenseBreakdownDAO {
-    
-    private Connection getConnection() throws SQLException {
-        // Database connection parameters
-        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
-        String username = "postgres";
-        String password = "Lithu19!"; // Updated to match application.properties
-        
-        return DriverManager.getConnection(url, username, password);
-    }
-=======
 public class ExpenseBreakdownDAO extends BaseDAO {
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new expense breakdown in the database
@@ -76,7 +62,7 @@ public class ExpenseBreakdownDAO extends BaseDAO {
     }
     
     /**
-     * Retrieves an expense breakdown for a specific trip
+     * Retrieves an expense breakdown by trip ID
      * @param tripId The ID of the trip
      * @return The ExpenseBreakdown object, or null if not found
      * @throws SQLException if a database error occurs
@@ -105,7 +91,7 @@ public class ExpenseBreakdownDAO extends BaseDAO {
      */
     public List<ExpenseBreakdown> getAllExpenseBreakdowns() throws SQLException {
         List<ExpenseBreakdown> expenseBreakdowns = new ArrayList<>();
-        String sql = "SELECT * FROM expense_breakdown ORDER BY created_at DESC";
+        String sql = "SELECT * FROM expense_breakdown ORDER BY created_at";
         
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();

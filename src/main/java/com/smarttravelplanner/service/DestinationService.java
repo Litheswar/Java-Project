@@ -1,50 +1,32 @@
 package com.smarttravelplanner.service;
 
-import com.smarttravelplanner.db.DBConnection;
+import com.smarttravelplanner.db.DestinationDAO;
 import com.smarttravelplanner.model.Destination;
 
-import java.sql.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DestinationService {
     
-<<<<<<< HEAD
     private final DestinationDAO destinationDAO;
     
     public DestinationService() {
         this.destinationDAO = new DestinationDAO();
     }
     
-=======
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
     /**
      * Retrieves all destinations from the database
      * @return List of Destination objects
      */
     public List<Destination> getAllDestinations() {
-        List<Destination> destinations = new ArrayList<>();
-        String query = "SELECT id, country, state, city, base_cost FROM destinations ORDER BY id";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-            
-            while (rs.next()) {
-                Destination destination = new Destination();
-                destination.setId(rs.getInt("id"));
-                destination.setCountry(rs.getString("country"));
-                destination.setState(rs.getString("state"));
-                destination.setCity(rs.getString("city"));
-                destination.setBaseCost(rs.getDouble("base_cost"));
-                destinations.add(destination);
-            }
+        try {
+            return destinationDAO.getAllDestinations();
         } catch (SQLException e) {
             System.err.println("Error retrieving destinations: " + e.getMessage());
             e.printStackTrace();
+            return new ArrayList<>();
         }
-        
-        return destinations;
     }
     
     /**
@@ -53,29 +35,13 @@ public class DestinationService {
      * @return Destination object or null if not found
      */
     public Destination getDestinationById(int id) {
-        String query = "SELECT id, country, state, city, base_cost FROM destinations WHERE id = ?";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    Destination destination = new Destination();
-                    destination.setId(rs.getInt("id"));
-                    destination.setCountry(rs.getString("country"));
-                    destination.setState(rs.getString("state"));
-                    destination.setCity(rs.getString("city"));
-                    destination.setBaseCost(rs.getDouble("base_cost"));
-                    return destination;
-                }
-            }
+        try {
+            return destinationDAO.getDestinationById(id);
         } catch (SQLException e) {
             System.err.println("Error retrieving destination: " + e.getMessage());
             e.printStackTrace();
+            return null;
         }
-        
-        return null;
     }
     
     /**
@@ -84,35 +50,14 @@ public class DestinationService {
      * @return true if successful, false otherwise
      */
     public boolean addDestination(Destination destination) {
-        String query = "INSERT INTO destinations (country, state, city, base_cost) VALUES (?, ?, ?, ?)";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            
-            stmt.setString(1, destination.getCountry());
-            stmt.setString(2, destination.getState());
-            stmt.setString(3, destination.getCity());
-            stmt.setDouble(4, destination.getBaseCost());
-            
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0) {
-                // Get the generated ID
-                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        destination.setId(generatedKeys.getInt(1));
-                    }
-                }
-                return true;
-            }
+        try {
+            return destinationDAO.createDestination(destination) > 0;
         } catch (SQLException e) {
             System.err.println("Error adding destination: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
-        
-        return false;
     }
-<<<<<<< HEAD
-=======
     
     /**
      * Updates an existing destination in the database
@@ -120,25 +65,13 @@ public class DestinationService {
      * @return true if successful, false otherwise
      */
     public boolean updateDestination(Destination destination) {
-        String query = "UPDATE destinations SET country = ?, state = ?, city = ?, base_cost = ? WHERE id = ?";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setString(1, destination.getCountry());
-            stmt.setString(2, destination.getState());
-            stmt.setString(3, destination.getCity());
-            stmt.setDouble(4, destination.getBaseCost());
-            stmt.setInt(5, destination.getId());
-            
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
+        try {
+            return destinationDAO.updateDestination(destination);
         } catch (SQLException e) {
             System.err.println("Error updating destination: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
-        
-        return false;
     }
     
     /**
@@ -147,21 +80,12 @@ public class DestinationService {
      * @return true if successful, false otherwise
      */
     public boolean deleteDestination(int id) {
-        String query = "DELETE FROM destinations WHERE id = ?";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            
-            stmt.setInt(1, id);
-            
-            int rowsAffected = stmt.executeUpdate();
-            return rowsAffected > 0;
+        try {
+            return destinationDAO.deleteDestination(id);
         } catch (SQLException e) {
             System.err.println("Error deleting destination: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
-        
-        return false;
     }
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
 }

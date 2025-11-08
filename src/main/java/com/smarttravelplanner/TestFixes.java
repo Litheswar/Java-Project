@@ -11,18 +11,14 @@ public class TestFixes {
         
         try {
             // Test the new getStatesWithBaseBudget method
-<<<<<<< HEAD
-            com.smarttravelplanner.db.DestinationDAO destinationDAO = new com.smarttravelplanner.db.DestinationDAO();
-=======
             DestinationDAO destinationDAO = new DestinationDAO();
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
             List<String> states = destinationDAO.getStatesWithBaseBudget("India");
-            System.out.println("✓ getStatesWithBaseBudget method exists and compiles");
+            System.out.println("✓ getStatesWithBaseBudget method exists and compiles. Found " + states.size() + " states");
             
             // Test the fixed type mismatch
             List<com.smarttravelplanner.model.Destination> affordableDests = 
                 destinationDAO.getAffordableDestinations(5000.0);
-            System.out.println("✓ getAffordableDestinations type mismatch fixed");
+            System.out.println("✓ getAffordableDestinations type mismatch fixed. Found " + affordableDests.size() + " affordable destinations");
             
             System.out.println("All fixes verified successfully!");
             

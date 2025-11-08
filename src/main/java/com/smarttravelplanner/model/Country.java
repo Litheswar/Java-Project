@@ -1,8 +1,6 @@
 package com.smarttravelplanner.model;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Country {
     private int id;

@@ -13,7 +13,7 @@ public class Route {
     private double cost;
     private Timestamp createdAt;
     private Timestamp updatedAt;
-    
+
     // Default constructor
     public Route() {}
     

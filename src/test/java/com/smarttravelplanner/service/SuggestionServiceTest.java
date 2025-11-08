@@ -110,11 +110,6 @@ public class SuggestionServiceTest {
         throw new AssertionError(message + ". Expected not null, but was null");
     }
     
-    private static void assertNull(Object actual, String message) {
-        if (actual == null) return;
-        throw new AssertionError(message + ". Expected null, but was: " + actual);
-    }
-    
     private static void assertTrue(boolean condition, String message) {
         if (condition) return;
         throw new AssertionError(message + ". Expected true, but was false");

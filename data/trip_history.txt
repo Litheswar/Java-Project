@@ -4,3 +4,5 @@ Traveler: lithu | Country: Singapore | Destination: Lille | Budget: ₹7777777 |
 Traveler: lithesh | Country: France | Destination: Lille | Budget: ₹555555 | Cost: ₹15064 | Date: 2025-11-07T14:11:02.665563300
 =======
 >>>>>>> parent of a75ffb45 (Connected Backend to Database)
+Traveler: lithu | Country: Australia | Destination: Lille | Budget: ₹66666 | Cost: ₹6010 | Date: 2025-11-07T22:53:11.066840400
+Traveler: Lithesh | Country: India | Destination: Lille | Budget: ₹334444 | Cost: ₹11488 | Date: 2025-11-08T12:09:46.781161600

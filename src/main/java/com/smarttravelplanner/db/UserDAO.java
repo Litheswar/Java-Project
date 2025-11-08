@@ -7,20 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-<<<<<<< HEAD
-public class UserDAO {
-    
-    private Connection getConnection() throws SQLException {
-        // Database connection parameters
-        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
-        String username = "postgres";
-        String password = "Lithu19!"; // Updated to match application.properties
-        
-        return DriverManager.getConnection(url, username, password);
-    }
-=======
 public class UserDAO extends BaseDAO {
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new user in the database
@@ -49,27 +36,6 @@ public class UserDAO extends BaseDAO {
         return null;
     }
     
-    // Backward compatibility method
-    public int insertUser(String name, int age, int familyCount, double budget) throws SQLException {
-        String sql = "INSERT INTO users (name, age, family_count, budget) VALUES (?, ?, ?, ?) RETURNING id";
-        
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setString(1, name);
-            stmt.setInt(2, age);
-            stmt.setInt(3, familyCount);
-            stmt.setDouble(4, budget);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("id");
-                }
-            }
-        }
-        return -1;
-    }
-    
     /**
      * Retrieves a user by its ID
      * @param id The ID of the user to retrieve
@@ -94,13 +60,36 @@ public class UserDAO extends BaseDAO {
     }
     
     /**
+     * Retrieves a user by email
+     * @param email The email of the user to retrieve
+     * @return The User object, or null if not found
+     * @throws SQLException if a database error occurs
+     */
+    public User getUserByEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, email);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
      * Retrieves all users from the database
      * @return A list of all users
      * @throws SQLException if a database error occurs
      */
     public List<User> getAllUsers() throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users ORDER BY name";
+        String sql = "SELECT * FROM users ORDER BY created_at";
         
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
@@ -108,28 +97,6 @@ public class UserDAO extends BaseDAO {
             
             while (rs.next()) {
                 users.add(mapResultSetToUser(rs));
-            }
-        }
-        return users;
-    }
-    
-    // Backward compatibility method
-    public List<String> getAllUsersAsString() throws SQLException {
-        List<String> users = new ArrayList<>();
-        String sql = "SELECT * FROM users";
-        
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            
-            while (rs.next()) {
-                String user = String.format("ID: %d, Name: %s, Age: %d, Family Count: %d, Budget: %.2f",
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getInt("age"),
-                    rs.getInt("family_count"),
-                    rs.getDouble("budget"));
-                users.add(user);
             }
         }
         return users;

@@ -1,7 +1,6 @@
 package com.smarttravelplanner.db;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
@@ -15,14 +14,6 @@ public abstract class BaseDAO {
      * @throws SQLException if connection fails
      */
     protected Connection getConnection() throws SQLException {
-<<<<<<< HEAD
-        // Database connection parameters
-        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
-        String username = "postgres";
-        String password = "Lithu19!"; // Updated to match application.properties
-        
-        return DriverManager.getConnection(url, username, password);
-=======
         return DBConnection.getConnection();
     }
     
@@ -31,6 +22,5 @@ public abstract class BaseDAO {
      */
     protected void closeConnection() {
         DBConnection.closeConnection();
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
     }
 }

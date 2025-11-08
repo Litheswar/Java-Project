@@ -12,8 +12,6 @@ public class DBConnection {
     private static final String PASSWORD = System.getenv("DB_PASSWORD") != null ? 
         System.getenv("DB_PASSWORD") : "Lithu19!";
     
-<<<<<<< HEAD
-=======
     private static Connection connection = null;
     
     // Private constructor to prevent instantiation
@@ -36,7 +34,6 @@ public class DBConnection {
         return connection;
     }
     
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
     /**
      * Closes the database connection
      */

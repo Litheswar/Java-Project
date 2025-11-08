@@ -6,20 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-<<<<<<< HEAD
-public class ExpenseDAO {
-    
-    private Connection getConnection() throws SQLException {
-        // Database connection parameters
-        String url = "jdbc:postgresql://localhost:5432/smart_travel_db";
-        String username = "postgres";
-        String password = "Lithu19!"; // Updated to match application.properties
-        
-        return DriverManager.getConnection(url, username, password);
-    }
-=======
 public class ExpenseDAO extends BaseDAO {
->>>>>>> parent of a75ffb45 (Connected Backend to Database)
     
     /**
      * Creates a new expense in the database
@@ -28,16 +15,15 @@ public class ExpenseDAO extends BaseDAO {
      * @throws SQLException if a database error occurs
      */
     public int createExpense(Expense expense) throws SQLException {
-        String sql = "INSERT INTO expenses (trip_id, category, description, amount, expense_date) VALUES (?, ?, ?, ?, ?) RETURNING id";
+        String sql = "INSERT INTO expenses (trip_id, category, amount, description) VALUES (?, ?, ?, ?) RETURNING id";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, expense.getTripId());
             stmt.setString(2, expense.getCategory());
-            stmt.setString(3, expense.getDescription());
-            stmt.setDouble(4, expense.getAmount());
-            stmt.setTimestamp(5, expense.getExpenseDate());
+            stmt.setDouble(3, expense.getAmount());
+            stmt.setString(4, expense.getDescription());
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -79,7 +65,7 @@ public class ExpenseDAO extends BaseDAO {
      */
     public List<Expense> getExpensesByTripId(int tripId) throws SQLException {
         List<Expense> expenses = new ArrayList<>();
-        String sql = "SELECT * FROM expenses WHERE trip_id = ? ORDER BY expense_date";
+        String sql = "SELECT * FROM expenses WHERE trip_id = ? ORDER BY created_at";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -102,7 +88,7 @@ public class ExpenseDAO extends BaseDAO {
      */
     public List<Expense> getAllExpenses() throws SQLException {
         List<Expense> expenses = new ArrayList<>();
-        String sql = "SELECT * FROM expenses ORDER BY expense_date";
+        String sql = "SELECT * FROM expenses ORDER BY created_at";
         
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement();
@@ -122,17 +108,16 @@ public class ExpenseDAO extends BaseDAO {
      * @throws SQLException if a database error occurs
      */
     public boolean updateExpense(Expense expense) throws SQLException {
-        String sql = "UPDATE expenses SET trip_id = ?, category = ?, description = ?, amount = ?, expense_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        String sql = "UPDATE expenses SET trip_id = ?, category = ?, amount = ?, description = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, expense.getTripId());
             stmt.setString(2, expense.getCategory());
-            stmt.setString(3, expense.getDescription());
-            stmt.setDouble(4, expense.getAmount());
-            stmt.setTimestamp(5, expense.getExpenseDate());
-            stmt.setInt(6, expense.getId());
+            stmt.setDouble(3, expense.getAmount());
+            stmt.setString(4, expense.getDescription());
+            stmt.setInt(5, expense.getId());
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;

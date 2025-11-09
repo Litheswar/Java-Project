@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeftIcon, 
@@ -10,9 +10,12 @@ import {
 } from '@heroicons/react/24/outline';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import { useAppContext } from '../context/AppContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAppContext();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -66,8 +69,28 @@ const LoginPage = () => {
     // Simulate API call
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      // Redirect to dashboard on successful login
-      navigate('/dashboard');
+      // Call login function from context with user data
+      login({
+        id: 1,
+        name: "Alex Johnson",
+        email: formData.email,
+        avatar: "AJ",
+        ecoScore: 85,
+        travelPoints: 1250,
+        streak: 7,
+        badges: [
+          { id: 1, name: "Eco Warrior", icon: "🌱" },
+          { id: 2, name: "Explorer", icon: "🗺️" },
+          { id: 3, name: "Budget Master", icon: "💰" }
+        ],
+        travelPersona: "Eco Explorer",
+        theme: "nature"
+      });
+      
+      // Redirect to the originally requested page or dashboard
+      const redirectPath = localStorage.getItem('redirectAfterLogin') || '/dashboard';
+      localStorage.removeItem('redirectAfterLogin');
+      navigate(redirectPath);
     } catch (error) {
       setErrors({ general: 'Invalid email or password' });
     } finally {

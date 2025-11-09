@@ -6,7 +6,7 @@ mkdir out 2>nul
 
 REM Compile all source files
 echo Compiling source files...
-javac -d out src\main\java\com\smarttravelplanner\exceptions\*.java src\main\java\com\smarttravelplanner\model\*.java src\main\java\com\smarttravelplanner\service\*.java src\main\java\com\smarttravelplanner\utils\*.java src\main\java\com\smarttravelplanner\db\*.java src\main\java\com\smarttravelplanner\*.java
+javac -d out src\main\java\com\smarttravelplanner\exceptions\*.java src\main\java\com\smarttravelplanner\model\*.java src\main\java\com\smarttravelplanner\service\*.java src\main\java\com\smarttravelplanner\utils\*.java src\main\java\com\smarttravelplanner\db\*.java src\main\java\com\smarttravelplanner\controller\*.java src\main\java\com\smarttravelplanner\*.java
 
 if %errorlevel% neq 0 (
     echo Compilation failed!
@@ -42,17 +42,12 @@ echo.
 echo To run comprehensive database test:
 echo   java -cp out com.smarttravelplanner.db.ComprehensiveTest
 echo.
-echo To run other tests, use one of the following commands:
-echo   java -cp out com.smarttravelplanner.db.DBConnectionTest
-echo   java -cp out com.smarttravelplanner.db.UserDAOTest
-echo   java -cp out com.smarttravelplanner.model.DestinationTest
-echo   java -cp out com.smarttravelplanner.model.UserTest
-echo   java -cp out com.smarttravelplanner.model.PlanTest
-echo   java -cp out com.smarttravelplanner.service.PlannerServiceTest
-echo   java -cp out com.smarttravelplanner.service.CostManagerTest
-echo   java -cp out com.smarttravelplanner.service.LocationServiceTest
-echo   java -cp out com.smarttravelplanner.service.SuggestionServiceTest
-echo.
-echo To run the main application:
+echo To run the main CLI application:
 echo   java -cp out com.smarttravelplanner.Main
+echo.
+echo To run the REST API server:
+echo   java -cp out com.smarttravelplanner.RestApiServer
+echo.
+echo To run the REST API server on a specific port:
+echo   java -cp out com.smarttravelplanner.RestApiServer 8081
 echo.

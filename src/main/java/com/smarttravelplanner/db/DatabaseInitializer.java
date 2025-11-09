@@ -3,8 +3,6 @@ package com.smarttravelplanner.db;
 import java.sql.*;
 import java.util.UUID;
 
-import com.smarttravelplanner.db.DBConnection;
-
 /**
  * DatabaseInitializer for the Smart Travel Planner project.
  * Automatically creates and populates the PostgreSQL database smart_travel_db.

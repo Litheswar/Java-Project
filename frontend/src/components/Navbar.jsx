@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   HomeIcon, 
@@ -9,15 +9,19 @@ import {
   UserIcon, 
   CogIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
+import { useAppContext } from '../context/AppContext';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAppContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { name: 'Home', path: '/', icon: HomeIcon },
+    { name: 'Home', path: '/dashboard', icon: HomeIcon },
     { name: 'Planner', path: '/planner', icon: MapIcon },
     { name: 'Expenses', path: '/expenses', icon: CreditCardIcon },
     { name: 'Alerts', path: '/alerts', icon: BellIcon },
@@ -27,6 +31,11 @@ const Navbar = () => {
 
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   return (
@@ -56,6 +65,13 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
+            <button
+              onClick={handleLogout}
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-primary hover:bg-blue-50/30 transition-all duration-200"
+            >
+              <ArrowRightOnRectangleIcon className="h-5 w-5 mr-1" />
+              Logout
+            </button>
           </div>
           
           {/* Mobile menu button */}
@@ -98,6 +114,16 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
+            <button
+              onClick={() => {
+                handleLogout();
+                setIsMenuOpen(false);
+              }}
+              className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-primary hover:bg-blue-50/30 transition-all duration-200"
+            >
+              <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2" />
+              Logout
+            </button>
           </div>
         </motion.div>
       )}

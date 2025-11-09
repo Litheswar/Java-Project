@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   CalendarIcon, 
@@ -9,6 +10,7 @@ import {
   TrophyIcon,
   FireIcon
 } from '@heroicons/react/24/outline';
+import { FaLeaf, FaCoins, FaFire, FaSuitcaseRolling } from 'react-icons/fa';
 import Card from '../components/Card';
 import Chart from '../components/Chart';
 import Button from '../components/Button';
@@ -21,6 +23,7 @@ import {
 } from '../assets/mockData';
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const [upcomingTrips, setUpcomingTrips] = useState([]);
   const [recentAlerts, setRecentAlerts] = useState([]);
   
@@ -48,32 +51,36 @@ const DashboardPage = () => {
     {
       title: "Eco Score",
       value: mockUser.ecoScore,
-      icon: <SparklesIcon className="h-6 w-6 text-green-500" />,
+      icon: <FaLeaf className="text-white" />,
       change: "+5 from last month",
       color: "from-green-400 to-green-600"
     },
     {
       title: "Travel Points",
       value: mockUser.travelPoints,
-      icon: <TrophyIcon className="h-6 w-6 text-yellow-500" />,
+      icon: <FaCoins className="text-white" />,
       change: "+150 this month",
       color: "from-yellow-400 to-yellow-600"
     },
     {
       title: "Current Streak",
       value: mockUser.streak,
-      icon: <FireIcon className="h-6 w-6 text-red-500" />,
+      icon: <FaFire className="text-white" />,
       change: "Keep it up!",
       color: "from-red-400 to-red-600"
     },
     {
       title: "Active Trips",
-      value: upcomingTrips.length,
-      icon: <MapPinIcon className="h-6 w-6 text-blue-500" />,
+      value: `${upcomingTrips.length} active, 1 planning`,
+      icon: <FaSuitcaseRolling className="text-white" />,
       change: "Planning 1 trip",
       color: "from-blue-400 to-blue-600"
     }
   ];
+  
+  const handleCreateNewTrip = () => {
+    navigate('/planner');
+  };
   
   return (
     <div className="py-8">
@@ -91,12 +98,12 @@ const DashboardPage = () => {
               </p>
             </div>
             <div className="mt-4 flex md:mt-0 md:ml-4">
-              <Button variant="primary">Create New Trip</Button>
+              <Button variant="primary" onClick={handleCreateNewTrip}>Create New Trip</Button>
             </div>
           </div>
           
           {/* Stats Section */}
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 stats-grid">
             {statCards.map((stat, index) => (
               <motion.div
                 key={index}
@@ -104,14 +111,14 @@ const DashboardPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <Card hoverEffect={true}>
+                <Card hoverEffect={true} className="stat-card">
                   <div className="flex items-center">
-                    <div className={`flex-shrink-0 p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
-                      {stat.icon}
+                    <div className={`flex-shrink-0 p-3 rounded-lg bg-gradient-to-r ${stat.color} shadow-md`}>
+                      <div className="text-2xl">{stat.icon}</div>
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-sm font-medium text-gray-600">{stat.title}</h3>
-                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                      <h3 className="text-sm font-bold text-gray-600">{stat.title}</h3>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
                       <p className="text-xs text-gray-500 mt-1">{stat.change}</p>
                     </div>
                   </div>

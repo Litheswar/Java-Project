@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   MapPinIcon, 
@@ -10,17 +10,19 @@ import {
   ChevronRightIcon,
   LightBulbIcon,
   CloudIcon,
-  TrophyIcon
+  TrophyIcon,
+  GlobeAltIcon,
+  TruckIcon,
+  CakeIcon,
+  HomeIcon
 } from '@heroicons/react/24/outline';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Stepper from '../components/Stepper';
-import Map from '../components/Map';
+import CountriesList from '../components/CountriesList';
+import CountryMap from '../components/CountryMap';
 import TravelAdvisor from '../components/TravelAdvisor';
-import {
-  mockDestinations,
-  mockMapData
-} from '../assets/mockData';
+import { useApi } from '../hooks/useApi';
 
 const PlannerPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -29,10 +31,21 @@ const PlannerPage = () => {
     startDate: '',
     endDate: '',
     travelers: 1,
-    budget: ''
+    budget: '',
+    mealsPerDay: 3,
+    transportType: 'mixed',
+    foodType: 'mixed'
   });
   
+  const { data: plannerOptions, loading: optionsLoading } = useApi('/api/planner/options');
+  const { data: countries } = useApi('/api/countries');
+  
+  // State for selected country data
+  const [selectedCountryData, setSelectedCountryData] = useState(null);
+  
   // Mock eco-friendly suggestions
+  const [isEcoTipsOpen, setIsEcoTipsOpen] = useState(false);
+  
   const ecoSuggestions = [
     "Choose trains over flights for shorter distances to reduce CO2 emissions by up to 90%",
     "Stay at eco-certified accommodations to support sustainable tourism",
@@ -53,8 +66,19 @@ const PlannerPage = () => {
     { title: 'Dates' },
     { title: 'Travelers' },
     { title: 'Budget' },
+    { title: 'Preferences' },
     { title: 'Review' }
   ];
+  
+  // Update selected country data when destination changes
+  useEffect(() => {
+    if (tripData.destination && countries) {
+      const country = countries.find(c => c.id === tripData.destination);
+      setSelectedCountryData(country || null);
+    } else {
+      setSelectedCountryData(null);
+    }
+  }, [tripData.destination, countries]);
   
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -76,50 +100,79 @@ const PlannerPage = () => {
     }));
   };
   
+  const handleCountrySelect = (country) => {
+    setTripData(prev => ({
+      ...prev,
+      destination: country.id
+    }));
+  };
+  
   const renderStepContent = () => {
     switch (currentStep) {
       case 0: // Destination
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="lg:w-1/2">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Choose your destination</h3>
-              <div className="space-y-4">
-                {mockDestinations.map((destination) => (
-                  <Card 
-                    key={destination.id}
-                    hoverEffect={true}
-                    className={`cursor-pointer ${
-                      tripData.destination === destination.id ? 'ring-2 ring-primary' : ''
-                    }`}
-                    onClick={() => setTripData(prev => ({ ...prev, destination: destination.id }))}
-                  >
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
-                      </div>
-                      <div className="ml-4">
-                        <h4 className="text-sm font-medium text-gray-900">{destination.name}</h4>
-                        <p className="text-sm text-gray-500">{destination.country}</p>
-                        <div className="mt-1 flex items-center">
-                          <SparklesIcon className="h-4 w-4 text-green-500 mr-1" />
-                          <span className="text-xs text-green-600 font-medium">
-                            {destination.sustainabilityScore}% sustainable
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              <CountriesList 
+                onCountrySelect={handleCountrySelect} 
+                selectedCountry={tripData.destination ? { id: tripData.destination } : null}
+              />
             </div>
             
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Map Preview</h3>
-              <Map 
-                center={mockMapData.center}
-                markers={mockMapData.markers}
-                className="h-96"
-              />
+            <div className="lg:w-1/2">
+              <div className="flex flex-col h-full">
+                {/* Selected Country Preview Card */}
+                {tripData.destination && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Selected Destination</h3>
+                    <Card className="p-4">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
+                          <span className="text-xs font-bold text-white">
+                            {selectedCountryData?.code || selectedCountryData?.name?.substring(0, 2).toUpperCase() || 'N/A'}
+                          </span>
+                        </div>
+                        
+                        <div className="ml-4 flex-1">
+                          <h3 className="text-lg font-bold text-gray-900">{selectedCountryData?.name || 'Unknown Country'}</h3>
+                          {selectedCountryData?.code && (
+                            <p className="text-sm text-gray-500">{selectedCountryData.code}</p>
+                          )}
+                          
+                          {/* Sustainability Score */}
+                          {selectedCountryData?.sustainabilityScore && (
+                            <div className="mt-2 flex items-center">
+                              <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <svg className="mr-1 h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                                </svg>
+                                {selectedCountryData.sustainabilityScore}% Sustainable
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+                
+                <div className="flex-1">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Map Preview</h3>
+                  <div className="h-96">
+                    <CountryMap 
+                      onCountrySelect={(countryCode) => {
+                        // Find the country object by code
+                        const country = countries.find(c => c.code === countryCode);
+                        if (country) {
+                          handleCountrySelect(country);
+                        }
+                      }} 
+                      selectedCountry={selectedCountryData}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -169,11 +222,21 @@ const PlannerPage = () => {
                 </div>
                 
                 <Card className="mt-6">
-                  <h4 className="text-sm font-medium text-gray-900">Travel Tips</h4>
-                  <p className="mt-2 text-sm text-gray-600">
-                    For the best experience, we recommend planning at least 2 weeks in advance. 
-                    Consider shoulder seasons for better prices and fewer crowds.
-                  </p>
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-sm font-medium text-gray-900">Travel Tips</h4>
+                    <button 
+                      onClick={() => setIsEcoTipsOpen(!isEcoTipsOpen)}
+                      className="md:hidden text-primary hover:text-primary-dark"
+                    >
+                      {isEcoTipsOpen ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                  <div className={`${isEcoTipsOpen ? 'block' : 'hidden'} md:block mt-2`}>
+                    <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                      <li>For the best experience, we recommend planning at least 2 weeks in advance. </li>
+                      <li>Consider shoulder seasons for better prices and fewer crowds.</li>
+                    </ul>
+                  </div>
                 </Card>
               </div>
             </div>
@@ -322,14 +385,24 @@ const PlannerPage = () => {
                 </div>
                 
                 <Card className="mt-6">
-                  <h4 className="text-sm font-medium text-gray-900">Budget Tips</h4>
-                  <ul className="mt-2 text-sm text-gray-600 list-disc pl-5 space-y-1">
-                    <li>Allocate 30% for accommodation</li>
-                    <li>25% for transportation</li>
-                    <li>20% for food and dining</li>
-                    <li>15% for activities and entertainment</li>
-                    <li>10% for shopping and souvenirs</li>
-                  </ul>
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-sm font-medium text-gray-900">Budget Tips</h4>
+                    <button 
+                      onClick={() => setIsEcoTipsOpen(!isEcoTipsOpen)}
+                      className="md:hidden text-primary hover:text-primary-dark"
+                    >
+                      {isEcoTipsOpen ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                  <div className={`${isEcoTipsOpen ? 'block' : 'hidden'} md:block mt-2`}>
+                    <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                      <li>Allocate 30% for accommodation</li>
+                      <li>25% for transportation</li>
+                      <li>20% for food and dining</li>
+                      <li>15% for activities and entertainment</li>
+                      <li>10% for shopping and souvenirs</li>
+                    </ul>
+                  </div>
                 </Card>
               </div>
             </div>
@@ -425,7 +498,142 @@ const PlannerPage = () => {
           </div>
         );
       
-      case 4: // Review
+      case 4: // Preferences
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Travel Preferences</h3>
+              <Card>
+                <div className="space-y-6">
+                  {/* Meals per day - Enhanced UI with numeric stepper */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Meals per Day</h4>
+                    <div className="flex items-center">
+                      <button
+                        type="button"
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
+                        onClick={() => setTripData(prev => ({ 
+                          ...prev, 
+                          mealsPerDay: Math.max(1, (prev.mealsPerDay || 3) - 1) 
+                        }))}
+                      >
+                        <span className="text-lg">-</span>
+                      </button>
+                      <div className="flex items-center justify-center px-4 py-2 border-t border-b border-gray-300 bg-white font-medium text-gray-700">
+                        {tripData.mealsPerDay || 3}
+                      </div>
+                      <button
+                        type="button"
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
+                        onClick={() => setTripData(prev => ({ 
+                          ...prev, 
+                          mealsPerDay: Math.min(5, (prev.mealsPerDay || 3) + 1) 
+                        }))}
+                      >
+                        <span className="text-lg">+</span>
+                      </button>
+                      <div className="ml-4 text-sm text-gray-500">
+                        meals per day
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Food Preference - Radio buttons */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Food Preference</h4>
+                    <div className="flex space-x-4">
+                      {['Veg', 'Non-Veg', 'Mixed'].map((type) => (
+                        <label key={type} className="inline-flex items-center">
+                          <input
+                            type="radio"
+                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                            name="foodType"
+                            checked={(tripData.foodType || 'Mixed') === type}
+                            onChange={() => setTripData(prev => ({ ...prev, foodType: type }))}
+                          />
+                          <span className="ml-2 text-sm text-gray-700">{type}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Transport Type - Chip-style buttons */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Transport Preference</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {['Train', 'Flight', 'Sea Cruise', 'Mixed'].map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            (tripData.transportType || 'Mixed') === type.toLowerCase()
+                              ? 'bg-primary text-white'
+                              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                          }`}
+                          onClick={() => setTripData(prev => ({ 
+                            ...prev, 
+                            transportType: type.toLowerCase() 
+                          }))}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Sustainability Impact</h3>
+              <Card className="h-full">
+                <div className="flex flex-col h-full">
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium text-gray-900">Your Choices</h4>
+                    <ul className="mt-4 space-y-3">
+                      <li className="flex items-start">
+                        <div className="flex-shrink-0 mt-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        </div>
+                        <p className="ml-3 text-sm text-gray-600">
+                          {tripData.mealsPerDay || 3} meals per day
+                        </p>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="flex-shrink-0 mt-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        </div>
+                        <p className="ml-3 text-sm text-gray-600">
+                          {tripData.transportType || 'mixed'} transport
+                        </p>
+                      </li>
+                      <li className="flex items-start">
+                        <div className="flex-shrink-0 mt-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        </div>
+                        <p className="ml-3 text-sm text-gray-600">
+                          {tripData.foodType || 'mixed'} diet
+                        </p>
+                      </li>
+                    </ul>
+                    
+                    <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                      <div className="flex items-center">
+                        <SparklesIcon className="h-5 w-5 text-green-500" />
+                        <h4 className="ml-2 text-sm font-medium text-green-800">Eco Impact</h4>
+                      </div>
+                      <p className="mt-2 text-sm text-green-700">
+                        Your choices could save up to {Math.round(((tripData.mealsPerDay || 3) * 0.5) + ((tripData.transportType || 'mixed') === 'train' ? 2 : (tripData.transportType || 'mixed') === 'flight' ? -1 : 0))}kg CO₂
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        );
+      
+      case 5: // Review
         return (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
@@ -435,7 +643,7 @@ const PlannerPage = () => {
                   <div>
                     <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Destination</h4>
                     <p className="mt-1 text-lg font-medium text-gray-900">
-                      {mockDestinations.find(d => d.id === tripData.destination)?.name || 'Not selected'}
+                      Selected destination
                     </p>
                   </div>
                   
@@ -459,6 +667,21 @@ const PlannerPage = () => {
                     <p className="mt-1 text-lg font-medium text-gray-900">
                       ${tripData.budget || 'Not set'}
                     </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Preferences</h4>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {tripData.mealsPerDay} meals/day
+                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {tripData.transportType}
+                      </span>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {tripData.foodType}
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="pt-4 border-t border-gray-200">

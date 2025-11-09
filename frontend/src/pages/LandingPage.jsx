@@ -13,6 +13,7 @@ import Card from '../components/Card';
 import TravelQuote from '../components/TravelQuote';
 import WorldMap from '../components/WorldMap';
 import DiscoveryQuiz from '../components/DiscoveryQuiz';
+import AuthTest from '../components/AuthTest';
 
 const LandingPage = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -446,6 +447,21 @@ const LandingPage = () => {
               </Link>
             </div>
           </motion.div>
+        </div>
+      </div>
+      
+      {/* Auth Test Section - for testing purposes */}
+      <div className="py-12 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="lg:text-center mb-12">
+            <h2 className="text-base text-primary font-semibold tracking-wide uppercase">
+              Authentication Test
+            </h2>
+            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+              Test Authentication Flow
+            </p>
+          </div>
+          <AuthTest />
         </div>
       </div>
     </div>

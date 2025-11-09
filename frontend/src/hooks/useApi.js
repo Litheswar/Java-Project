@@ -1,6 +1,64 @@
 import { useState, useEffect } from 'react';
+import * as apiService from '../services/api';
 
-// Mock API service
+// Custom hook for API calls
+export const useApi = (initialUrl = '', method = 'GET') => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [url, setUrl] = useState(initialUrl);
+
+  const execute = async (requestData = null) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      let result;
+      
+      // Map URL patterns to API service functions
+      if (url.includes('/api/countries')) {
+        result = await apiService.getCountries();
+      } else if (url.includes('/api/places')) {
+        const countryId = new URLSearchParams(url.split('?')[1]).get('countryId');
+        result = await apiService.getPlaces(countryId);
+      } else if (url.includes('/api/planner/options')) {
+        result = await apiService.getPlannerOptions();
+      } else if (url.includes('/api/planner/estimate') && method === 'POST') {
+        result = await apiService.postPlannerEstimate(requestData);
+      } else if (url.includes('/api/destinations')) {
+        const params = new URLSearchParams(url.split('?')[1]);
+        const countryId = params.get('countryId');
+        if (countryId) {
+          result = await apiService.getDestinationsByCountry(countryId);
+        } else {
+          result = await apiService.getDestinations();
+        }
+      } else {
+        // Fallback to mock service for other endpoints
+        result = await mockApiService.get(url);
+      }
+      
+      setData(result);
+      return result;
+    } catch (err) {
+      setError(err.message || 'An error occurred');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Execute GET request on mount if URL is provided
+  useEffect(() => {
+    if (method === 'GET' && url) {
+      execute();
+    }
+  }, [url, method]);
+
+  return { data, loading, error, execute, setUrl };
+};
+
+// Mock API service for backward compatibility
 const mockApiService = {
   get: async (url) => {
     // Simulate API delay
@@ -70,61 +128,6 @@ const mockApiService = {
     await new Promise(resolve => setTimeout(resolve, 500));
     return { success: true };
   }
-};
-
-/**
- * Custom hook for API calls
- * @param {string} initialUrl - The initial API endpoint
- * @param {string} method - HTTP method (GET, POST, PUT, DELETE)
- */
-export const useApi = (initialUrl = '', method = 'GET') => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [url, setUrl] = useState(initialUrl);
-
-  const execute = async (requestData = null) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      let result;
-      
-      switch (method.toUpperCase()) {
-        case 'GET':
-          result = await mockApiService.get(url);
-          break;
-        case 'POST':
-          result = await mockApiService.post(url, requestData);
-          break;
-        case 'PUT':
-          result = await mockApiService.put(url, requestData);
-          break;
-        case 'DELETE':
-          result = await mockApiService.delete(url);
-          break;
-        default:
-          throw new Error(`Unsupported HTTP method: ${method}`);
-      }
-      
-      setData(result);
-      return result;
-    } catch (err) {
-      setError(err.message || 'An error occurred');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Execute GET request on mount if URL is provided
-  useEffect(() => {
-    if (method === 'GET' && url) {
-      execute();
-    }
-  }, [url, method]);
-
-  return { data, loading, error, execute, setUrl };
 };
 
 export default useApi;

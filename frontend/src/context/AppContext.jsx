@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer, useState, useEffect } from 'react';
 
 // Initial state
 const initialState = {
@@ -138,7 +138,9 @@ const actionTypes = {
   MARK_ALERT_READ: 'MARK_ALERT_READ',
   ADD_ALERT: 'ADD_ALERT',
   UPDATE_USER: 'UPDATE_USER',
-  UPDATE_ECO_SCORE: 'UPDATE_ECO_SCORE'
+  UPDATE_ECO_SCORE: 'UPDATE_ECO_SCORE',
+  LOGIN: 'LOGIN',
+  LOGOUT: 'LOGOUT'
 };
 
 // Reducer function
@@ -186,6 +188,18 @@ const appReducer = (state, action) => {
         ...state,
         user: { ...state.user, ecoScore: action.payload }
       };
+    case actionTypes.LOGIN:
+      return {
+        ...state,
+        isAuthenticated: true,
+        user: action.payload
+      };
+    case actionTypes.LOGOUT:
+      return {
+        ...state,
+        isAuthenticated: false,
+        user: null
+      };
     default:
       return state;
   }
@@ -197,6 +211,17 @@ const AppContext = createContext();
 // Provider component
 export const AppProvider = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check if user is authenticated on initial load
+  useEffect(() => {
+    // In a real app, this would check for a valid token or session
+    // For now, we'll just check if there's a user object
+    const user = localStorage.getItem('user');
+    if (user) {
+      setIsAuthenticated(true);
+    }
+  }, []);
 
   // Action creators
   const addTrip = (trip) => {
@@ -231,9 +256,22 @@ export const AppProvider = ({ children }) => {
     dispatch({ type: actionTypes.UPDATE_ECO_SCORE, payload: score });
   };
 
+  const login = (userData) => {
+    setIsAuthenticated(true);
+    localStorage.setItem('user', JSON.stringify(userData));
+    dispatch({ type: actionTypes.LOGIN, payload: userData });
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('user');
+    dispatch({ type: actionTypes.LOGOUT });
+  };
+
   return (
     <AppContext.Provider value={{
       ...state,
+      isAuthenticated,
       addTrip,
       updateTrip,
       deleteTrip,
@@ -241,7 +279,9 @@ export const AppProvider = ({ children }) => {
       markAlertRead,
       addAlert,
       updateUser,
-      updateEcoScore
+      updateEcoScore,
+      login,
+      logout
     }}>
       {children}
     </AppContext.Provider>

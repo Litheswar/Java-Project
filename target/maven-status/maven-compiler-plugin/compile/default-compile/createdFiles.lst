@@ -3,6 +3,7 @@ com\smarttravelplanner\utils\TravelUtils.class
 com\smarttravelplanner\exceptions\InvalidFamilyCountException.class
 com\smarttravelplanner\db\TripDAO.class
 com\smarttravelplanner\service\SmartAdvisor.class
+com\smarttravelplanner\RestApiServer.class
 com\smarttravelplanner\model\Expense.class
 com\smarttravelplanner\exceptions\InvalidInputException.class
 com\smarttravelplanner\db\UserDAO.class
@@ -20,6 +21,7 @@ com\smarttravelplanner\service\CostManager.class
 com\smarttravelplanner\model\Traveler.class
 com\smarttravelplanner\utils\DatabaseConnectionTest.class
 com\smarttravelplanner\utils\HelloWorld.class
+com\smarttravelplanner\controller\TravelController.class
 com\smarttravelplanner\model\Planner.class
 com\smarttravelplanner\model\TripConfig.class
 com\smarttravelplanner\model\Alert.class

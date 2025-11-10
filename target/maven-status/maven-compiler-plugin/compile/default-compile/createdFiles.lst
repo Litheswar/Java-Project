@@ -54,12 +54,14 @@ com\smarttravelplanner\model\User.class
 com\smarttravelplanner\HelloWorld.class
 com\smarttravelplanner\TestDatabaseConnection.class
 com\smarttravelplanner\db\AlertGenerator.class
+com\smarttravelplanner\model\DestinationSuggestion.class
 com\smarttravelplanner\TestDBConnection.class
 com\smarttravelplanner\SimpleMainUtil.class
 com\smarttravelplanner\service\DestinationService.class
 com\smarttravelplanner\model\CityPlan.class
 com\smarttravelplanner\db\CountryDAOTest.class
 com\smarttravelplanner\exceptions\InvalidAgeException.class
+com\smarttravelplanner\model\TripCostBreakdown.class
 com\smarttravelplanner\SimpleTravelPlanner.class
 com\smarttravelplanner\db\ActivityDAO.class
 com\smarttravelplanner\model\Activity.class

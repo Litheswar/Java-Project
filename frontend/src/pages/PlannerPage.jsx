@@ -24,6 +24,7 @@ import StateSelect from '../components/StateSelect';
 import CountryMap from '../components/CountryMap';
 import TravelAdvisor from '../components/TravelAdvisor';
 import { useApi } from '../hooks/useApi';
+import { useBudgetCalculator } from '../hooks/useBudgetCalculator';
 import * as apiService from '../services/api';
 
 const PlannerPage = () => {
@@ -159,6 +160,9 @@ const PlannerPage = () => {
       alert('An error occurred while creating your trip plan.');
     }
   };
+  
+  // Use the new budget calculator hook
+  const { budgetEstimate, loading: budgetLoading, error: budgetError, suggestions } = useBudgetCalculator(tripData);
   
   const renderStepContent = () => {
     switch (currentStep) {
@@ -485,6 +489,80 @@ const PlannerPage = () => {
                   </div>
                 </div>
                 
+                {/* Budget validation message */}
+                {tripData.budget && budgetEstimate && (
+                  <div className={`p-4 rounded-lg ${
+                    parseFloat(tripData.budget) >= budgetEstimate.estimatedTotalCost 
+                      ? 'bg-green-50 border border-green-200' 
+                      : 'bg-red-50 border border-red-200'
+                  }`}>
+                    <div className="flex">
+                      <div className={`flex-shrink-0 ${
+                        parseFloat(tripData.budget) >= budgetEstimate.estimatedTotalCost 
+                          ? 'text-green-400' 
+                          : 'text-red-400'
+                      }`}>
+                        {parseFloat(tripData.budget) >= budgetEstimate.estimatedTotalCost ? (
+                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="ml-3">
+                        <h3 className={`text-sm font-medium ${
+                          parseFloat(tripData.budget) >= budgetEstimate.estimatedTotalCost 
+                            ? 'text-green-800' 
+                            : 'text-red-800'
+                        }`}>
+                          {parseFloat(tripData.budget) >= budgetEstimate.estimatedTotalCost 
+                            ? 'Budget is sufficient!' 
+                            : 'Budget insufficient'}
+                        </h3>
+                        <div className={`mt-2 text-sm ${
+                          parseFloat(tripData.budget) >= budgetEstimate.estimatedTotalCost 
+                            ? 'text-green-700' 
+                            : 'text-red-700'
+                        }`}>
+                          <p>
+                            Your estimated cost is ${budgetEstimate.estimatedTotalCost.toLocaleString()} 
+                            {parseFloat(tripData.budget) < budgetEstimate.estimatedTotalCost && (
+                              <span> but your set budget is ${parseFloat(tripData.budget).toLocaleString()}.</span>
+                            )}
+                          </p>
+                          {parseFloat(tripData.budget) < budgetEstimate.estimatedTotalCost && (
+                            <p className="mt-1">Recommendation: Reduce trip duration or explore suggested destinations below.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Smart alternate destination suggestions */}
+                {suggestions && suggestions.length > 0 && (
+                  <Card>
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Alternative Options</h4>
+                    <ul className="space-y-2">
+                      {suggestions.map((suggestion, index) => (
+                        <li key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{suggestion.name}</p>
+                            <p className="text-xs text-gray-500">Best travel month: {suggestion.bestMonth}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-gray-900">Estimated: ${suggestion.estimatedCost.toLocaleString()}</p>
+                            <p className="text-xs text-green-600">Save ${suggestion.savings.toLocaleString()}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                )}
+                
                 <Card>
                   <h4 className="text-sm font-medium text-gray-900 mb-3">Budget Tips</h4>
                   <ul className="text-sm text-gray-600 space-y-2">
@@ -520,77 +598,109 @@ const PlannerPage = () => {
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Budget Breakdown</h3>
               <Card className="h-96">
-                {tripData.budget ? (
+                {budgetLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <span className="ml-2 text-gray-600">Calculating budget...</span>
+                  </div>
+                ) : budgetError ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <svg className="h-12 w-12 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <h4 className="mt-4 text-lg font-medium text-gray-900">Error calculating budget</h4>
+                      <p className="mt-2 text-sm text-gray-500">Please check your trip details and try again.</p>
+                    </div>
+                  </div>
+                ) : budgetEstimate ? (
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-medium text-gray-900">Estimated Allocation</h4>
-                      <span className="text-lg font-bold text-primary">${tripData.budget}</span>
+                      <span className="text-lg font-bold text-primary">${budgetEstimate.estimatedTotalCost.toLocaleString()}</span>
                     </div>
                     
                     <div className="space-y-4">
                       <div>
                         <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
-                          <span>Accommodation (30%)</span>
-                          <span>${Math.round(tripData.budget * 0.3)}</span>
+                          <span>Accommodation</span>
+                          <span>${budgetEstimate.breakdown.accommodation.toLocaleString()}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: '30%' }}
+                            style={{ width: `${(budgetEstimate.breakdown.accommodation / budgetEstimate.estimatedTotalCost) * 100}%` }}
                           ></div>
                         </div>
                       </div>
                       
                       <div>
                         <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
-                          <span>Transportation (25%)</span>
-                          <span>${Math.round(tripData.budget * 0.25)}</span>
+                          <span>Meals</span>
+                          <span>${budgetEstimate.breakdown.meals.toLocaleString()}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-green-600 h-2 rounded-full" 
-                            style={{ width: '25%' }}
+                            style={{ width: `${(budgetEstimate.breakdown.meals / budgetEstimate.estimatedTotalCost) * 100}%` }}
                           ></div>
                         </div>
                       </div>
                       
                       <div>
                         <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
-                          <span>Food & Dining (20%)</span>
-                          <span>${Math.round(tripData.budget * 0.2)}</span>
+                          <span>Transportation</span>
+                          <span>${budgetEstimate.breakdown.transportation.toLocaleString()}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-yellow-600 h-2 rounded-full" 
-                            style={{ width: '20%' }}
+                            style={{ width: `${(budgetEstimate.breakdown.transportation / budgetEstimate.estimatedTotalCost) * 100}%` }}
                           ></div>
                         </div>
                       </div>
                       
                       <div>
                         <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
-                          <span>Activities & Shopping (15%)</span>
-                          <span>${Math.round(tripData.budget * 0.15)}</span>
+                          <span>Activities</span>
+                          <span>${budgetEstimate.breakdown.activities.toLocaleString()}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-purple-600 h-2 rounded-full" 
-                            style={{ width: '15%' }}
+                            style={{ width: `${(budgetEstimate.breakdown.activities / budgetEstimate.estimatedTotalCost) * 100}%` }}
                           ></div>
                         </div>
                       </div>
                       
-                      <div>
-                        <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
-                          <span>Emergency Fund (10%)</span>
-                          <span>${Math.round(tripData.budget * 0.1)}</span>
+                      {/* Leftover budget indicator */}
+                      {tripData.budget && parseFloat(tripData.budget) > budgetEstimate.estimatedTotalCost && (
+                        <div className="pt-4 border-t border-gray-200">
+                          <div className="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                            <span>Leftover Budget</span>
+                            <span>${(parseFloat(tripData.budget) - budgetEstimate.estimatedTotalCost).toLocaleString()}</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-green-500 h-2 rounded-full" 
+                              style={{ width: `${((parseFloat(tripData.budget) - budgetEstimate.estimatedTotalCost) / parseFloat(tripData.budget)) * 100}%` }}
+                            ></div>
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-red-600 h-2 rounded-full" 
-                            style={{ width: '10%' }}
-                          ></div>
-                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Confidence indicator */}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Cost Confidence</span>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          budgetEstimate.costConfidence === 'HIGH' ? 'bg-green-100 text-green-800' :
+                          budgetEstimate.costConfidence === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {budgetEstimate.costConfidence}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -598,14 +708,34 @@ const PlannerPage = () => {
                   <div className="text-center py-8">
                     <CurrencyDollarIcon className="h-12 w-12 text-gray-400 mx-auto" />
                     <h4 className="mt-4 text-lg font-medium text-gray-900">
-                      Enter a budget to see breakdown
+                      Enter trip details to see breakdown
                     </h4>
                     <p className="mt-2 text-sm text-gray-500">
-                      Select or enter a budget amount
+                      Complete previous steps to get dynamic budget estimation
                     </p>
                   </div>
                 )}
               </Card>
+              
+              {/* Optimize My Budget Button */}
+              {budgetEstimate && (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                    onClick={() => {
+                      // This would implement the budget optimization logic
+                      alert('Budget optimization feature would adjust trip parameters to fit your budget');
+                    }}
+                  >
+                    <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Optimize My Budget
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         );

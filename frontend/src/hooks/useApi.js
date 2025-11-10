@@ -30,6 +30,20 @@ export const useApi = (initialUrl = '', method = 'GET') => {
         result = await apiService.postPlannerEstimate(requestData);
       } else if (url.includes('/api/trips') && method === 'POST') {
         result = await apiService.saveTripData(requestData);
+      } else if (url.includes('/api/trip/calculateBudget') && method === 'POST') {
+        result = await apiService.calculateBudget(requestData);
+      } else if (url.includes('/api/trip/suggestDestinations') && method === 'GET') {
+        const params = new URLSearchParams(url.split('?')[1]);
+        const budget = params.get('budget');
+        const region = params.get('region');
+        // Prevent API call when budget or region are null/undefined
+        if (!budget || !region || budget === 'null' || region === 'null') {
+          console.warn("Budget or region missing. Skipping suggestDestinations call.");
+          setData([]);
+          setLoading(false);
+          return [];
+        }
+        result = await apiService.suggestDestinations(budget, region);
       } else if (url.includes('/api/destinations')) {
         const params = new URLSearchParams(url.split('?')[1]);
         const countryId = params.get('countryId');
@@ -164,6 +178,31 @@ const mockApiService = {
       };
       
       return statesByCountry[countryCode] || [];
+    }
+    
+    // Mock data for calculateBudget endpoint
+    if (url.includes('/trip/calculateBudget') && method === 'POST') {
+      // Return mock budget calculation result
+      return {
+        estimatedTotalCost: 4200,
+        breakdown: {
+          accommodation: 1800,
+          meals: 900,
+          transportation: 1000,
+          activities: 500
+        },
+        costConfidence: "HIGH"
+      };
+    }
+    
+    // Mock data for suggestDestinations endpoint
+    if (url.includes('/trip/suggestDestinations') && method === 'GET') {
+      // Return mock destination suggestions
+      return [
+        { name: "Thailand", estimatedCost: 3500, savings: 700, bestMonth: "November" },
+        { name: "Vietnam", estimatedCost: 2900, savings: 1300, bestMonth: "December" },
+        { name: "India", estimatedCost: 2500, savings: 1700, bestMonth: "October" }
+      ];
     }
     
     // Mock data for countries endpoint

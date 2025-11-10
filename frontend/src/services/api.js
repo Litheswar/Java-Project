@@ -126,6 +126,24 @@ export const getDestinationsByCountry = async (countryId) => {
   return await apiRequest(`/destinations?countryId=${countryId}`);
 };
 
+// Calculate budget
+export const calculateBudget = async (payload) => {
+  return await apiRequest('/trip/calculateBudget', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+};
+
+// Suggest destinations
+export const suggestDestinations = async (budget, region) => {
+  // Prevent API call when budget or region are null/undefined
+  if (!budget || !region || budget === 'null' || region === 'null') {
+    console.warn("Budget or region missing. Skipping suggestDestinations call.");
+    return []; // Return empty array instead of making API call
+  }
+  return await apiRequest(`/trip/suggestDestinations?budget=${budget}&region=${region}`);
+};
+
 // Default export for backward compatibility
 export default {
   getCountries,
@@ -136,4 +154,6 @@ export default {
   saveTripData,
   getDestinations,
   getDestinationsByCountry,
+  calculateBudget,
+  suggestDestinations,
 };

@@ -48,9 +48,10 @@ const StateSelect = ({
     setIsManualInput(false);
     setManualState('');
     setIsOpen(false);
-    // Also reset selected state when country changes
+    // Also reset selected state when country changes, but only if onStateSelect is defined
     if (onStateSelect) {
-      onStateSelect(null);
+      // Don't fire with null if we want to avoid premature calls
+      // onStateSelect(null);
     }
   }, [stableSelectedCountry?.code, onStateSelect]); // Reset when country actually changes
   
@@ -68,6 +69,11 @@ const StateSelect = ({
   
   const handleStateSelect = (state) => {
     console.log('StateSelect: handleStateSelect called with state', state);
+    // Prevent firing with null values
+    if (!state) {
+      console.log('StateSelect: Skipping state update with null value');
+      return;
+    }
     // Call the parent's onStateSelect callback first
     if (onStateSelect) {
       onStateSelect(state);

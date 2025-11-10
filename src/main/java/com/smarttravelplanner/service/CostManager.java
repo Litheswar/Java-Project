@@ -5,14 +5,20 @@ import com.smarttravelplanner.model.CityPlan;
 import com.smarttravelplanner.model.CityPlanner;
 import com.smarttravelplanner.model.Planner;
 import com.smarttravelplanner.model.TourPlanner;
+import com.smarttravelplanner.model.TripCostBreakdown;
+import com.smarttravelplanner.model.DestinationSuggestion;
 import com.smarttravelplanner.utils.RouteOptimizer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CostManager {
-    private static final double FOOD_COST_PER_MEAL = 1.0;
+    private static final double FOOD_COST_PER_MEAL = 15.0;
     private static final double STAY_COST_PER_DAY_BUDGET = 50.0;
     private static final double STAY_COST_PER_DAY_STANDARD = 100.0;
     private static final double STAY_COST_PER_DAY_PREMIUM = 200.0;
-    private static final double SHOPPING_LEISURE_COMMUTE_BASE = 100.0;
+    private static final double SHOPPING_LEISURE_COMMUTE_BASE = 50.0;
+    private static final double TRANSPORTATION_BASE_COST = 200.0;
     
     /**
      * Estimates the total cost for a trip
@@ -221,6 +227,221 @@ public class CostManager {
             return RouteOptimizer.calculateSustainabilityScore(tourPlanner.getTravelMode());
         }
         return 5; // Default score
+    }
+    
+    /**
+     * Calculates dynamic estimated cost for trip planning
+     * @param destination The destination country
+     * @param state The destination state/province
+     * @param travelers Number of travelers
+     * @param days Number of trip days
+     * @param mealsPerDay Number of meals per day
+     * @param accommodationType Type of accommodation (Budget/Standard/Premium)
+     * @param transportationMode Mode of transportation (Rail/Air/Sea/Mixed)
+     * @return Total estimated cost with breakdown
+     */
+    public TripCostBreakdown calculateDynamicCost(String destination, String state, int travelers, int days,
+                                                 int mealsPerDay, String accommodationType, String transportationMode) {
+        // Calculate accommodation cost
+        double accommodationCost = calculateAccommodationCost(days, travelers, accommodationType);
+        
+        // Calculate food cost
+        double foodCost = calculateFoodCostNew(travelers, days, mealsPerDay);
+        
+        // Calculate transportation cost
+        double transportationCost = calculateTransportationCost(destination, state, travelers, transportationMode);
+        
+        // Calculate activities cost
+        double activitiesCost = calculateActivitiesCost(destination, state, travelers, days);
+        
+        // Calculate total cost
+        double totalCost = accommodationCost + foodCost + transportationCost + activitiesCost;
+        
+        // Create breakdown object
+        return new TripCostBreakdown(totalCost, accommodationCost, foodCost, transportationCost, activitiesCost);
+    }
+    
+    /**
+     * Calculates accommodation cost based on type
+     * @param days Number of trip days
+     * @param travelers Number of travelers
+     * @param accommodationType Type of accommodation
+     * @return Accommodation cost
+     */
+    public double calculateAccommodationCost(int days, int travelers, String accommodationType) {
+        double costPerDayPerPerson;
+        
+        switch (accommodationType.toLowerCase()) {
+            case "budget":
+                costPerDayPerPerson = STAY_COST_PER_DAY_BUDGET;
+                break;
+            case "premium":
+                costPerDayPerPerson = STAY_COST_PER_DAY_PREMIUM;
+                break;
+            case "standard":
+            default:
+                costPerDayPerPerson = STAY_COST_PER_DAY_STANDARD;
+                break;
+        }
+        
+        return costPerDayPerPerson * days * travelers;
+    }
+    
+    /**
+     * Calculates food cost (new version to avoid duplicate method)
+     * @param travelers Number of travelers
+     * @param days Number of trip days
+     * @param mealsPerDay Number of meals per day
+     * @return Food cost
+     */
+    public double calculateFoodCostNew(int travelers, int days, int mealsPerDay) {
+        return FOOD_COST_PER_MEAL * travelers * days * mealsPerDay;
+    }
+    
+    /**
+     * Calculates transportation cost based on destination
+     * @param destination The destination country
+     * @param state The destination state/province
+     * @param travelers Number of travelers
+     * @param transportationMode Mode of transportation
+     * @return Transportation cost
+     */
+    public double calculateTransportationCost(String destination, String state, int travelers, String transportationMode) {
+        double baseCost = TRANSPORTATION_BASE_COST;
+        
+        // Adjust cost based on destination
+        if (destination != null) {
+            switch (destination.toLowerCase()) {
+                case "japan":
+                    baseCost = 2000.0;
+                    break;
+                case "france":
+                    baseCost = 1500.0;
+                    break;
+                case "india":
+                    baseCost = 800.0;
+                    break;
+                case "united states":
+                case "us":
+                    baseCost = 1800.0;
+                    break;
+                case "italy":
+                    baseCost = 1600.0;
+                    break;
+                default:
+                    baseCost = 1200.0;
+                    break;
+            }
+        }
+        
+        // Adjust cost based on transportation mode
+        double multiplier;
+        switch (transportationMode.toLowerCase()) {
+            case "rail":
+                multiplier = 0.8;
+                break;
+            case "air":
+                multiplier = 1.2;
+                break;
+            case "sea":
+                multiplier = 1.1;
+                break;
+            case "mixed":
+            default:
+                multiplier = 1.0;
+                break;
+        }
+        
+        return baseCost * multiplier * travelers;
+    }
+    
+    /**
+     * Calculates activities cost
+     * @param destination The destination country
+     * @param state The destination state/province
+     * @param travelers Number of travelers
+     * @param days Number of trip days
+     * @return Activities cost
+     */
+    public double calculateActivitiesCost(String destination, String state, int travelers, int days) {
+        double costPerDayPerPerson = 50.0;
+        
+        // Adjust cost based on destination
+        if (destination != null) {
+            switch (destination.toLowerCase()) {
+                case "japan":
+                    costPerDayPerPerson = 70.0;
+                    break;
+                case "france":
+                    costPerDayPerPerson = 65.0;
+                    break;
+                case "india":
+                    costPerDayPerPerson = 40.0;
+                    break;
+                case "united states":
+                case "us":
+                    costPerDayPerPerson = 60.0;
+                    break;
+                case "italy":
+                    costPerDayPerPerson = 65.0;
+                    break;
+                default:
+                    costPerDayPerPerson = 50.0;
+                    break;
+            }
+        }
+        
+        return costPerDayPerPerson * days * travelers;
+    }
+    
+    /**
+     * Determines cost confidence level based on available data
+     * @param destination The destination country
+     * @param state The destination state/province
+     * @return Confidence level (HIGH/MEDIUM/LOW)
+     */
+    public String determineCostConfidence(String destination, String state) {
+        if (destination != null && !destination.isEmpty() && state != null && !state.isEmpty()) {
+            return "HIGH";
+        } else if (destination != null && !destination.isEmpty()) {
+            return "MEDIUM";
+        } else {
+            return "LOW";
+        }
+    }
+    
+    /**
+     * Gets suggested destinations based on budget
+     * @param budget User's budget
+     * @param region Preferred region
+     * @return List of suggested destinations
+     */
+    public List<DestinationSuggestion> suggestDestinations(double budget, String region) {
+        List<DestinationSuggestion> suggestions = new ArrayList<>();
+        
+        // Sample destination suggestions based on budget
+        if (budget > 0) {
+            if (budget >= 10000) {
+                suggestions.add(new DestinationSuggestion("Japan", 9500, budget, "March"));
+                suggestions.add(new DestinationSuggestion("France", 8900, budget, "May"));
+            } else if (budget >= 8000) {
+                suggestions.add(new DestinationSuggestion("Thailand", 7500, budget, "November"));
+                suggestions.add(new DestinationSuggestion("Vietnam", 6900, budget, "December"));
+            } else if (budget >= 6000) {
+                suggestions.add(new DestinationSuggestion("India", 5500, budget, "October"));
+                suggestions.add(new DestinationSuggestion("Turkey", 5200, budget, "September"));
+            } else {
+                suggestions.add(new DestinationSuggestion("Thailand", 4500, budget, "November"));
+                suggestions.add(new DestinationSuggestion("Vietnam", 3900, budget, "December"));
+            }
+        } else {
+            // Default suggestions
+            suggestions.add(new DestinationSuggestion("Thailand", 4500, 5000, "November"));
+            suggestions.add(new DestinationSuggestion("Vietnam", 3900, 5000, "December"));
+            suggestions.add(new DestinationSuggestion("India", 5500, 6000, "October"));
+        }
+        
+        return suggestions;
     }
     
     /**

@@ -3,64 +3,30 @@ package com.smarttravelplanner.controller;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import com.smarttravelplanner.service.CostManager;
+import com.smarttravelplanner.model.TripCostBreakdown;
+import com.smarttravelplanner.model.DestinationSuggestion;
 import spark.Request;
 import spark.Response;
 
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
 public class TravelController {
     private static final Logger logger = Logger.getLogger(TravelController.class.getName());
     private Gson gson;
+    private CostManager costManager;
     
     public TravelController() {
         this.gson = new Gson();
+        this.costManager = new CostManager();
     }
     
     public void setupRoutes() {
-        // GET /api/test/:param - test endpoint to verify parameterized routes work
-        spark.Spark.get("/api/test/:param", (req, res) -> {
-            String param = req.params(":param");
-            System.out.println("Test endpoint called with param: " + param);
-            return "Test endpoint working with param: " + param;
-        });
-        System.out.println("Registered route: /api/test/:param");
+        System.out.println("Setting up routes...");
         
-        // GET /api/simple-test - simple test endpoint
-        spark.Spark.get("/api/simple-test", (req, res) -> {
-            System.out.println("Simple test endpoint called");
-            return "Simple test endpoint working";
-        });
-        System.out.println("Registered route: /api/simple-test");
-        
-        // GET /api/countries/:countryCode/states - register this BEFORE the countries route
-        spark.Spark.get("/api/countries/:countryCode/states", this::getStatesByCountry);
-        System.out.println("Registered route: /api/countries/:countryCode/states");
-        
-        // GET /api/countries-states - new endpoint for states using query parameters
-        spark.Spark.get("/api/countries-states", this::getStatesByCountryQueryParam);
-        System.out.println("Registered route: /api/countries-states");
-        
-        // GET /api/places
-        spark.Spark.get("/api/places", this::getPlacesByCountry);
-        
-        // GET /api/planner/options
-        spark.Spark.get("/api/planner/options", this::getPlannerOptions);
-        
-        // POST /api/planner/estimate
-        spark.Spark.post("/api/planner/estimate", this::postPlannerEstimate);
-        
-        // POST /api/trips - new endpoint for saving trip data
-        spark.Spark.post("/api/trips", this::postTripData);
-        System.out.println("Registered route: /api/trips");
-        
-        // GET /api/destinations
-        spark.Spark.get("/api/destinations", this::getAllDestinations);
-        
-        // GET /api/countries - this should be registered LAST to avoid interfering with parameterized routes
-        spark.Spark.get("/api/countries", this::getAllCountries);
-        
-        // Enable CORS for all routes
+        // Enable CORS for all routes - this should be set up first
         spark.Spark.options("/*", (request, response) -> {
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
             if (accessControlRequestHeaders != null) {
@@ -80,6 +46,74 @@ public class TravelController {
             response.header("Access-Control-Allow-Headers", "*");
             response.header("Content-Type", "application/json");
         });
+        
+        // Register routes in a specific order to avoid conflicts
+        // Static routes should be registered before parameterized routes
+        
+        // Simple test endpoints first
+        spark.Spark.get("/api/simple-test", (req, res) -> {
+            System.out.println("Simple test endpoint called");
+            return "Simple test endpoint working";
+        });
+        System.out.println("Registered route: /api/simple-test");
+        
+        // Simple test endpoint for /api/trip/test
+        spark.Spark.get("/api/trip/test", (req, res) -> {
+            System.out.println("Trip test endpoint called - path: " + req.pathInfo());
+            System.out.println("Request method: " + req.requestMethod());
+            return "Trip test endpoint working";
+        });
+        System.out.println("Registered route: /api/trip/test");
+        
+        // POST /api/trip/calculateBudget - new endpoint for dynamic budget calculation
+        spark.Spark.post("/api/trip/calculateBudget", this::postCalculateBudget);
+        System.out.println("Registered route: /api/trip/calculateBudget");
+        
+        // GET /api/trip/suggestDestinations - new endpoint for destination suggestions
+        spark.Spark.get("/api/trip/suggestDestinations", this::getSuggestDestinations);
+        System.out.println("Registered route: /api/trip/suggestDestinations");
+        
+        // GET /api/test/:param - test endpoint to verify parameterized routes work
+        spark.Spark.get("/api/test/:param", (req, res) -> {
+            String param = req.params(":param");
+            System.out.println("Test endpoint called with param: " + param);
+            return "Test endpoint working with param: " + param;
+        });
+        System.out.println("Registered route: /api/test/:param");
+        
+        // GET /api/countries-states - new endpoint for states using query parameters
+        spark.Spark.get("/api/countries-states", this::getStatesByCountryQueryParam);
+        System.out.println("Registered route: /api/countries-states");
+        
+        // GET /api/places
+        spark.Spark.get("/api/places", this::getPlacesByCountry);
+        System.out.println("Registered route: /api/places");
+        
+        // GET /api/planner/options
+        spark.Spark.get("/api/planner/options", this::getPlannerOptions);
+        System.out.println("Registered route: /api/planner/options");
+        
+        // POST /api/planner/estimate
+        spark.Spark.post("/api/planner/estimate", this::postPlannerEstimate);
+        System.out.println("Registered route: /api/planner/estimate");
+        
+        // POST /api/trips - new endpoint for saving trip data
+        spark.Spark.post("/api/trips", this::postTripData);
+        System.out.println("Registered route: /api/trips");
+        
+        // GET /api/destinations
+        spark.Spark.get("/api/destinations", this::getAllDestinations);
+        System.out.println("Registered route: /api/destinations");
+        
+        // GET /api/countries/:countryCode/states - register this AFTER static routes but BEFORE the general countries route
+        spark.Spark.get("/api/countries/:countryCode/states", this::getStatesByCountry);
+        System.out.println("Registered route: /api/countries/:countryCode/states");
+        
+        // GET /api/countries - this should be registered LAST to avoid interfering with parameterized routes
+        spark.Spark.get("/api/countries", this::getAllCountries);
+        System.out.println("Registered route: /api/countries");
+        
+        System.out.println("Finished setting up routes");
     }
     
     // POST /api/trips - save trip data including state information
@@ -586,6 +620,100 @@ public class TravelController {
         }
         
         return dailySavings * tripDays * distanceMultiplier;
+    }
+    
+    // POST /api/trip/calculateBudget - new endpoint for dynamic budget calculation
+    private String postCalculateBudget(Request req, Response res) {
+        try {
+            System.out.println("Received request to /api/trip/calculateBudget");
+            System.out.println("Request body: " + req.body());
+            
+            // Parse the request body
+            JsonObject requestJson = gson.fromJson(req.body(), JsonObject.class);
+            
+            // Extract parameters
+            String destination = requestJson.has("destination") ? requestJson.get("destination").getAsString() : "";
+            String state = requestJson.has("state") ? requestJson.get("state").getAsString() : "";
+            int travelers = requestJson.has("travelers") ? requestJson.get("travelers").getAsInt() : 1;
+            int days = requestJson.has("days") ? requestJson.get("days").getAsInt() : 1;
+            int mealsPerDay = requestJson.has("mealsPerDay") ? requestJson.get("mealsPerDay").getAsInt() : 3;
+            String accommodationType = requestJson.has("accommodationType") ? requestJson.get("accommodationType").getAsString() : "Standard";
+            String transportationMode = requestJson.has("transportationMode") ? requestJson.get("transportationMode").getAsString() : "Mixed";
+            
+            System.out.println("Parameters: destination=" + destination + ", state=" + state + ", travelers=" + travelers + 
+                              ", days=" + days + ", mealsPerDay=" + mealsPerDay + ", accommodationType=" + accommodationType + 
+                              ", transportationMode=" + transportationMode);
+            
+            // Calculate estimated cost using CostManager
+            TripCostBreakdown costBreakdown = costManager.calculateDynamicCost(
+                destination, state, travelers, days, mealsPerDay, accommodationType, transportationMode);
+            
+            // Create breakdown
+            JsonObject breakdown = new JsonObject();
+            breakdown.addProperty("accommodation", Math.round(costBreakdown.getAccommodationCost()));
+            breakdown.addProperty("meals", Math.round(costBreakdown.getFoodCost()));
+            breakdown.addProperty("transportation", Math.round(costBreakdown.getTransportationCost()));
+            breakdown.addProperty("activities", Math.round(costBreakdown.getActivitiesCost()));
+            
+            // Determine cost confidence based on available data
+            String costConfidence = costManager.determineCostConfidence(destination, state);
+            
+            // Create response
+            JsonObject response = new JsonObject();
+            response.addProperty("estimatedTotalCost", Math.round(costBreakdown.getTotalCost()));
+            response.add("breakdown", breakdown);
+            response.addProperty("costConfidence", costConfidence);
+            
+            System.out.println("Sending response: " + response.toString());
+            
+            return gson.toJson(response);
+        } catch (Exception e) {
+            System.out.println("Error calculating budget: " + e.getMessage());
+            e.printStackTrace();
+            res.status(500);
+            return createErrorResponse("Failed to calculate budget");
+        }
+    }
+    
+    // GET /api/trip/suggestDestinations - new endpoint for destination suggestions
+    private String getSuggestDestinations(Request req, Response res) {
+        try {
+            String budgetParam = req.queryParams("budget");
+            String region = req.queryParams("region");
+            
+            // Add null-safe parameter handling
+            if (budgetParam == null || budgetParam.equals("null") || region == null || region.equals("null")) {
+                res.status(400);
+                return createErrorResponse("Budget and region are required.");
+            }
+            
+            double budget = Double.parseDouble(budgetParam);
+            
+            // Get suggested destinations based on budget using CostManager
+            List<DestinationSuggestion> suggestions = costManager.suggestDestinations(budget, region);
+            
+            // Convert to JSON array
+            JsonArray suggestionsArray = new JsonArray();
+            for (DestinationSuggestion suggestion : suggestions) {
+                JsonObject suggestionJson = new JsonObject();
+                suggestionJson.addProperty("name", suggestion.getName());
+                suggestionJson.addProperty("estimatedCost", suggestion.getEstimatedCost());
+                suggestionJson.addProperty("savings", suggestion.getSavings());
+                suggestionJson.addProperty("bestMonth", suggestion.getBestMonth());
+                suggestionsArray.add(suggestionJson);
+            }
+            
+            return gson.toJson(suggestionsArray);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid budget parameter: " + e.getMessage());
+            res.status(400);
+            return createErrorResponse("Invalid budget parameter. Must be a valid number.");
+        } catch (Exception e) {
+            System.out.println("Error suggesting destinations: " + e.getMessage());
+            e.printStackTrace();
+            res.status(500);
+            return createErrorResponse("Failed to suggest destinations");
+        }
     }
     
     // Helper method to create error response

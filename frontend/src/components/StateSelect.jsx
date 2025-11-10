@@ -54,22 +54,32 @@ const StateSelect = ({
     }
   }, [stableSelectedCountry?.code, onStateSelect]); // Reset when country actually changes
   
-  // Reset search term when selected state changes
+  // Update search term when selected state changes
   useEffect(() => {
     if (selectedState && selectedState.name) {
       setSearchTerm(selectedState.name);
-    } else {
+    } else if (selectedState === null) {
+      // Only clear search term when explicitly setting to null, not when undefined
       setSearchTerm('');
     }
+    // Note: We don't clear the search term when selectedState is undefined
+    // to maintain the current input value during loading states
   }, [selectedState]);
   
   const handleStateSelect = (state) => {
     console.log('StateSelect: handleStateSelect called with state', state);
+    // Call the parent's onStateSelect callback first
     if (onStateSelect) {
       onStateSelect(state);
-      setSearchTerm(state ? state.name : '');
-      setIsOpen(false);
     }
+    
+    // Update the search term to display in the input field
+    setSearchTerm(state ? state.name : '');
+    
+    // Close the dropdown with a small delay to ensure state update is processed
+    setTimeout(() => {
+      setIsOpen(false);
+    }, 50);
   };
   
   const handleManualInputChange = (e) => {
@@ -136,7 +146,7 @@ const StateSelect = ({
             id="state-select"
             placeholder={stableSelectedCountry ? "Type or select your state / province" : "Select a country first"}
             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-            value={selectedState && selectedState.name ? selectedState.name : searchTerm}
+            value={selectedState?.name || searchTerm || ''}
             onChange={(e) => setSearchTerm(e.target.value)}
             disabled={disabled || !stableSelectedCountry}
             onFocus={() => {
@@ -150,13 +160,8 @@ const StateSelect = ({
               }
             }}
             onBlur={(e) => {
-              // Delay closing to allow for clicks on dropdown items
-              setTimeout(() => {
-                // Check if the new focus target is outside the dropdown
-                if (!dropdownRef.current?.contains(document.activeElement)) {
-                  setIsOpen(false);
-                }
-              }, 150);
+              // Don't close the dropdown immediately on blur to allow for clicks on dropdown items
+              // The dropdown will be closed by handleStateSelect when a state is selected
             }}
           />
           

@@ -16,8 +16,11 @@ export const useApi = (initialUrl = '', method = 'GET') => {
       let result;
       
       // Map URL patterns to API service functions
-      if (url.includes('/api/countries')) {
+      if (url.includes('/api/countries') && !url.includes('/countries-states')) {
         result = await apiService.getCountries();
+      } else if (url.includes('/api/countries-states')) {
+        const countryCode = new URLSearchParams(url.split('?')[1]).get('countryCode');
+        result = await apiService.getStatesByCountry(countryCode);
       } else if (url.includes('/api/places')) {
         const countryId = new URLSearchParams(url.split('?')[1]).get('countryId');
         result = await apiService.getPlaces(countryId);
@@ -25,6 +28,8 @@ export const useApi = (initialUrl = '', method = 'GET') => {
         result = await apiService.getPlannerOptions();
       } else if (url.includes('/api/planner/estimate') && method === 'POST') {
         result = await apiService.postPlannerEstimate(requestData);
+      } else if (url.includes('/api/trips') && method === 'POST') {
+        result = await apiService.saveTripData(requestData);
       } else if (url.includes('/api/destinations')) {
         const params = new URLSearchParams(url.split('?')[1]);
         const countryId = params.get('countryId');
@@ -33,6 +38,9 @@ export const useApi = (initialUrl = '', method = 'GET') => {
         } else {
           result = await apiService.getDestinations();
         }
+      } else if (url) {
+        // Fallback to direct API call for other endpoints
+        result = await apiService.apiRequest(url.replace('/api', ''), { method });
       } else {
         // Fallback to mock service for other endpoints
         result = await mockApiService.get(url);
@@ -53,7 +61,7 @@ export const useApi = (initialUrl = '', method = 'GET') => {
     if (method === 'GET' && url) {
       execute();
     }
-  }, [url, method]);
+  }, [url, method]); // This will re-execute when the URL changes
 
   return { data, loading, error, execute, setUrl };
 };
@@ -108,6 +116,67 @@ const mockApiService = {
         { id: 1, tripId: 1, category: "Accommodation", amount: 800, date: "2023-06-15", description: "Hotel de Paris" },
         { id: 2, tripId: 1, category: "Transportation", amount: 450, date: "2023-06-16", description: "Flight to Paris" },
         { id: 3, tripId: 1, category: "Food", amount: 320, date: "2023-06-17", description: "Dining in Paris" }
+      ];
+    }
+    
+    // Mock data for countries-states endpoint - fixed format to match API
+    if (url.includes('/countries-states')) {
+      const params = new URLSearchParams(url.split('?')[1]);
+      const countryCode = params.get('countryCode');
+      
+      // Sample state data for different countries - matching API format
+      const statesByCountry = {
+        'US': [
+          { name: 'California', lat: 36.7783, lng: -119.4179 },
+          { name: 'Texas', lat: 31.9686, lng: -99.9018 },
+          { name: 'Florida', lat: 27.6648, lng: -81.5158 },
+          { name: 'New York', lat: 40.7128, lng: -74.0060 },
+          { name: 'Illinois', lat: 40.6331, lng: -89.3985 }
+        ],
+        'CA': [
+          { name: 'Ontario', lat: 51.2538, lng: -85.3232 },
+          { name: 'Quebec', lat: 46.8123, lng: -71.2158 },
+          { name: 'British Columbia', lat: 53.7267, lng: -127.6476 },
+          { name: 'Alberta', lat: 53.9333, lng: -116.5765 },
+          { name: 'Manitoba', lat: 53.7609, lng: -98.8139 }
+        ],
+        'AU': [
+          { name: 'New South Wales', lat: -33.8688, lng: 151.2093 },
+          { name: 'Victoria', lat: -37.8136, lng: 144.9631 },
+          { name: 'Queensland', lat: -27.4698, lng: 153.0251 },
+          { name: 'Western Australia', lat: -31.9505, lng: 115.8596 },
+          { name: 'South Australia', lat: -34.9285, lng: 138.6007 }
+        ],
+        'IN': [
+          { name: 'Maharashtra', lat: 19.7515, lng: 75.7139 },
+          { name: 'Karnataka', lat: 15.3173, lng: 75.7139 },
+          { name: 'Tamil Nadu', lat: 11.1271, lng: 78.6569 },
+          { name: 'West Bengal', lat: 22.9868, lng: 87.8550 },
+          { name: 'Gujarat', lat: 22.2587, lng: 71.1924 }
+        ],
+        'JP': [
+          { name: 'Tokyo', lat: 35.6762, lng: 139.6503 },
+          { name: 'Osaka', lat: 34.6937, lng: 135.5023 },
+          { name: 'Kyoto', lat: 35.0116, lng: 135.7681 },
+          { name: 'Hokkaido', lat: 43.0621, lng: 141.3544 },
+          { name: 'Okinawa', lat: 26.2124, lng: 127.6811 }
+        ]
+      };
+      
+      return statesByCountry[countryCode] || [];
+    }
+    
+    // Mock data for countries endpoint
+    if (url.includes('/countries') && !url.includes('/countries-states')) {
+      return [
+        { id: 1, name: 'United States', code: 'US' },
+        { id: 2, name: 'Canada', code: 'CA' },
+        { id: 3, name: 'Australia', code: 'AU' },
+        { id: 4, name: 'India', code: 'IN' },
+        { id: 5, name: 'Japan', code: 'JP' },
+        { id: 6, name: 'United Kingdom', code: 'GB' },
+        { id: 7, name: 'Germany', code: 'DE' },
+        { id: 8, name: 'France', code: 'FR' }
       ];
     }
     

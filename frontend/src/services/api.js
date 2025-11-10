@@ -82,6 +82,11 @@ export const getPlaces = async (countryId) => {
   return await apiRequest(`/places?countryId=${countryId}`);
 };
 
+// Get states for a specific country
+export const getStatesByCountry = async (countryCode) => {
+  return await apiRequest(`/countries-states?countryCode=${countryCode}`);
+};
+
 // Get planner options
 export const getPlannerOptions = async () => {
   // Check cache first
@@ -103,6 +108,14 @@ export const postPlannerEstimate = async (payload) => {
   });
 };
 
+// Save trip data
+export const saveTripData = async (payload) => {
+  return await apiRequest('/trips', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+};
+
 // Get all destinations
 export const getDestinations = async () => {
   return await apiRequest('/destinations');
@@ -117,8 +130,10 @@ export const getDestinationsByCountry = async (countryId) => {
 export default {
   getCountries,
   getPlaces,
+  getStatesByCountry,
   getPlannerOptions,
   postPlannerEstimate,
+  saveTripData,
   getDestinations,
   getDestinationsByCountry,
 };

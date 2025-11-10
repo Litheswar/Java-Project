@@ -15,6 +15,7 @@ public class Trip {
     private int mealsPerDay;
     private double totalEstimatedCost;
     private double totalBudget;
+    private String state; // Add state field
     private Timestamp createdAt;
     private Timestamp updatedAt;
     
@@ -24,7 +25,7 @@ public class Trip {
     
     // Constructor without ID (for creating new trips)
     public Trip(UUID userId, int destinationId, String tripType, String travelMode, String stayType, 
-               String mealType, int tripDays, int mealsPerDay, double totalEstimatedCost, double totalBudget) {
+               String mealType, int tripDays, int mealsPerDay, double totalEstimatedCost, double totalBudget, String state) {
         this.userId = userId;
         this.destinationId = destinationId;
         this.tripType = tripType;
@@ -35,11 +36,12 @@ public class Trip {
         this.mealsPerDay = mealsPerDay;
         this.totalEstimatedCost = totalEstimatedCost;
         this.totalBudget = totalBudget;
+        this.state = state;
     }
     
     // Constructor with all fields (for reading from database)
     public Trip(int id, UUID userId, int destinationId, String tripType, String travelMode, String stayType, 
-               String mealType, int tripDays, int mealsPerDay, double totalEstimatedCost, double totalBudget,
+               String mealType, int tripDays, int mealsPerDay, double totalEstimatedCost, double totalBudget, String state,
                Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.userId = userId;
@@ -52,6 +54,7 @@ public class Trip {
         this.mealsPerDay = mealsPerDay;
         this.totalEstimatedCost = totalEstimatedCost;
         this.totalBudget = totalBudget;
+        this.state = state;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -145,6 +148,14 @@ public class Trip {
         this.totalBudget = totalBudget;
     }
     
+    public String getState() {
+        return state;
+    }
+    
+    public void setState(String state) {
+        this.state = state;
+    }
+    
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -175,6 +186,7 @@ public class Trip {
                 ", mealsPerDay=" + mealsPerDay +
                 ", totalEstimatedCost=" + totalEstimatedCost +
                 ", totalBudget=" + totalBudget +
+                ", state='" + state + '\'' +
                 '}';
     }
 }

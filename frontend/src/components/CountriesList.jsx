@@ -8,6 +8,7 @@ const CountriesList = ({ onCountrySelect, selectedCountry, className = '' }) => 
   const { data: countries, loading, error } = useApi('/api/countries');
   const [searchTerm, setSearchTerm] = useState('');
   const countriesListRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   // Filter countries based on search term
   const filteredCountries = useMemo(() => {
@@ -21,6 +22,17 @@ const CountriesList = ({ onCountrySelect, selectedCountry, className = '' }) => 
   const handleCountryClick = (country) => {
     if (onCountrySelect) {
       onCountrySelect(country);
+      // Clear search term after selection
+      setSearchTerm('');
+    }
+  };
+
+  // Handle manual country selection via search input
+  const handleSearchSelect = (country) => {
+    if (onCountrySelect) {
+      onCountrySelect(country);
+      setSearchTerm('');
+      searchInputRef.current?.blur();
     }
   };
 
@@ -56,20 +68,61 @@ const CountriesList = ({ onCountrySelect, selectedCountry, className = '' }) => 
 
   return (
     <div className={className}>
-      {/* Search Bar */}
+      {/* Search Bar with Autocomplete */}
       <div className="relative mb-4">
         <input
+          ref={searchInputRef}
           type="text"
-          placeholder="Search countries..."
+          placeholder="Type or select a country"
           className="w-full px-4 py-3 pl-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={(e) => {
+            // Handle Enter key to select first country in list
+            if (e.key === 'Enter' && filteredCountries.length > 0) {
+              handleSearchSelect(filteredCountries[0]);
+            }
+          }}
         />
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
           </svg>
         </div>
+        
+        {/* Autocomplete Dropdown */}
+        {searchTerm && filteredCountries.length > 0 && (
+          <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md max-h-60 overflow-auto">
+            {filteredCountries.slice(0, 9).map((country) => (
+              <div
+                key={country.id}
+                className="px-4 py-3 text-sm hover:bg-gray-100 cursor-pointer flex items-center"
+                onClick={() => handleSearchSelect(country)}
+              >
+                <div className="flex-shrink-0 w-6 h-6 mr-3">
+                  {country.code ? (
+                    <ReactCountryFlag
+                      countryCode={country.code}
+                      svg
+                      style={{
+                        width: '1.5rem',
+                        height: '1.5rem',
+                        borderRadius: '0.25rem'
+                      }}
+                    />
+                  ) : (
+                    <div className="bg-gradient-to-br from-primary to-secondary rounded w-6 h-6 flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">
+                        {country.name.substring(0, 2).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <span>{country.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Vertical Scrollable Countries Grid */}
@@ -87,7 +140,7 @@ const CountriesList = ({ onCountrySelect, selectedCountry, className = '' }) => 
                 id={`country-${country.id}`}
                 hoverEffect={true}
                 className={`w-full cursor-pointer transition-all duration-200 ${
-                  selectedCountry?.code === country.code 
+                  selectedCountry?.id === country.id 
                     ? 'ring-4 ring-primary ring-opacity-50 shadow-xl scale-[1.02] bg-blue-50' 
                     : 'hover:shadow-lg hover:scale-[1.02]'
                 }`}

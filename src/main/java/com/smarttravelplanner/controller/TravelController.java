@@ -33,13 +33,13 @@ public class TravelController {
         });
         System.out.println("Registered route: /api/simple-test");
         
-        // GET /api/countries-states - new endpoint for states using query parameters
-        spark.Spark.get("/api/countries-states", this::getStatesByCountryQueryParam);
-        System.out.println("Registered route: /api/countries-states");
-        
         // GET /api/countries/:countryCode/states - register this BEFORE the countries route
         spark.Spark.get("/api/countries/:countryCode/states", this::getStatesByCountry);
         System.out.println("Registered route: /api/countries/:countryCode/states");
+        
+        // GET /api/countries-states - new endpoint for states using query parameters
+        spark.Spark.get("/api/countries-states", this::getStatesByCountryQueryParam);
+        System.out.println("Registered route: /api/countries-states");
         
         // GET /api/places
         spark.Spark.get("/api/places", this::getPlacesByCountry);
@@ -49,6 +49,10 @@ public class TravelController {
         
         // POST /api/planner/estimate
         spark.Spark.post("/api/planner/estimate", this::postPlannerEstimate);
+        
+        // POST /api/trips - new endpoint for saving trip data
+        spark.Spark.post("/api/trips", this::postTripData);
+        System.out.println("Registered route: /api/trips");
         
         // GET /api/destinations
         spark.Spark.get("/api/destinations", this::getAllDestinations);
@@ -76,6 +80,49 @@ public class TravelController {
             response.header("Access-Control-Allow-Headers", "*");
             response.header("Content-Type", "application/json");
         });
+    }
+    
+    // POST /api/trips - save trip data including state information
+    private String postTripData(Request req, Response res) {
+        try {
+            // Parse the request body
+            JsonObject requestJson = gson.fromJson(req.body(), JsonObject.class);
+            
+            // Log the received data for debugging
+            System.out.println("Received trip data: " + requestJson.toString());
+            
+            // Extract trip parameters
+            String destination = requestJson.has("destination") ? requestJson.get("destination").getAsString() : "";
+            String state = requestJson.has("state") ? requestJson.get("state").getAsString() : "";
+            String startDate = requestJson.has("startDate") ? requestJson.get("startDate").getAsString() : "";
+            String endDate = requestJson.has("endDate") ? requestJson.get("endDate").getAsString() : "";
+            int travelers = requestJson.has("travelers") ? requestJson.get("travelers").getAsInt() : 1;
+            double budget = requestJson.has("budget") ? requestJson.get("budget").getAsDouble() : 0.0;
+            int mealsPerDay = requestJson.has("mealsPerDay") ? requestJson.get("mealsPerDay").getAsInt() : 3;
+            String transportType = requestJson.has("transportType") ? requestJson.get("transportType").getAsString() : "mixed";
+            String foodType = requestJson.has("foodType") ? requestJson.get("foodType").getAsString() : "mixed";
+            
+            // Create a response with the saved trip data
+            JsonObject responseJson = new JsonObject();
+            responseJson.addProperty("message", "Trip data saved successfully");
+            responseJson.addProperty("destination", destination);
+            responseJson.addProperty("state", state);
+            responseJson.addProperty("startDate", startDate);
+            responseJson.addProperty("endDate", endDate);
+            responseJson.addProperty("travelers", travelers);
+            responseJson.addProperty("budget", budget);
+            responseJson.addProperty("mealsPerDay", mealsPerDay);
+            responseJson.addProperty("transportType", transportType);
+            responseJson.addProperty("foodType", foodType);
+            responseJson.addProperty("id", System.currentTimeMillis()); // Simple ID generation
+            
+            return gson.toJson(responseJson);
+        } catch (Exception e) {
+            System.out.println("Error saving trip data: " + e.getMessage());
+            e.printStackTrace();
+            res.status(500);
+            return createErrorResponse("Failed to save trip data");
+        }
     }
     
     // GET /api/countries-states/:countryCode

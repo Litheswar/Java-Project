@@ -16,7 +16,7 @@ public class TripDAO extends BaseDAO {
      * @throws SQLException if a database error occurs
      */
     public int createTrip(Trip trip) throws SQLException {
-        String sql = "INSERT INTO trips (user_id, destination_id, trip_type, travel_mode, stay_type, meal_type, trip_days, meals_per_day, total_estimated_cost, total_budget) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
+        String sql = "INSERT INTO trips (user_id, destination_id, trip_type, travel_mode, stay_type, meal_type, trip_days, meals_per_day, total_estimated_cost, total_budget, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -31,6 +31,7 @@ public class TripDAO extends BaseDAO {
             stmt.setInt(8, trip.getMealsPerDay());
             stmt.setDouble(9, trip.getTotalEstimatedCost());
             stmt.setDouble(10, trip.getTotalBudget());
+            stmt.setString(11, trip.getState());
             
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
@@ -115,7 +116,7 @@ public class TripDAO extends BaseDAO {
      * @throws SQLException if a database error occurs
      */
     public boolean updateTrip(Trip trip) throws SQLException {
-        String sql = "UPDATE trips SET user_id = ?, destination_id = ?, trip_type = ?, travel_mode = ?, stay_type = ?, meal_type = ?, trip_days = ?, meals_per_day = ?, total_estimated_cost = ?, total_budget = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        String sql = "UPDATE trips SET user_id = ?, destination_id = ?, trip_type = ?, travel_mode = ?, stay_type = ?, meal_type = ?, trip_days = ?, meals_per_day = ?, total_estimated_cost = ?, total_budget = ?, state = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -130,7 +131,8 @@ public class TripDAO extends BaseDAO {
             stmt.setInt(8, trip.getMealsPerDay());
             stmt.setDouble(9, trip.getTotalEstimatedCost());
             stmt.setDouble(10, trip.getTotalBudget());
-            stmt.setInt(11, trip.getId());
+            stmt.setString(11, trip.getState());
+            stmt.setInt(12, trip.getId());
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
@@ -174,6 +176,7 @@ public class TripDAO extends BaseDAO {
             rs.getInt("meals_per_day"),
             rs.getDouble("total_estimated_cost"),
             rs.getDouble("total_budget"),
+            rs.getString("state"),
             rs.getTimestamp("created_at"),
             rs.getTimestamp("updated_at")
         );
